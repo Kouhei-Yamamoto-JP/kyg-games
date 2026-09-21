@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>回転寿司ゲーム</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Start screen -->
+    <section id="start-screen" class="screen">
+      <div class="panel">
+        <h1 class="title">🍣 回転寿司</h1>
+        <p class="subtitle">ベルトの寿司をタッチしてお客さんに届けよう！</p>
+        <ul class="howto">
+          <li>動くお皿をタップ／クリック</li>
+          <li>注文と合う寿司を届けるとスコア！</li>
+          <li>間違える・時間切れでライフ減少</li>
+          <li>ライフが 0 でゲームオーバー</li>
+        </ul>
+        <button id="btn-start" class="btn primary" type="button">スタート</button>
+      </div>
+    </section>
+
+    <!-- Game screen -->
+    <section id="game-screen" class="screen hidden">
+      <header id="hud">
+        <div class="hud-item">
+          <span class="hud-label">スコア</span>
+          <span id="score" class="hud-value">0</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">ライフ</span>
+          <span id="lives" class="hud-value lives">❤️❤️❤️</span>
+        </div>
+        <div class="hud-item">
+          <span class="hud-label">お客</span>
+          <span id="customer-count" class="hud-value">1</span>
+        </div>
+      </header>
+
+      <div id="customers" aria-label="お客さん"></div>
+
+      <div id="belt-area">
+        <div id="belt-track">
+          <div class="belt-inner"></div>
+          <div id="plates"></div>
+        </div>
+        <div class="shop-sign">回転寿司</div>
+      </div>
+
+      <div id="toast" class="toast hidden" aria-live="polite"></div>
+    </section>
+
+    <!-- Game over screen -->
+    <section id="gameover-screen" class="screen hidden">
+      <div class="panel">
+        <h2 class="title">ゲームオーバー</h2>
+        <p class="final-score">スコア: <strong id="final-score">0</strong></p>
+        <p class="final-hint" id="final-hint"></p>
+        <button id="btn-retry" class="btn primary" type="button">もう一度</button>
+      </div>
+    </section>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>

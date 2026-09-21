@@ -203,8 +203,12 @@
     tekka: "maki-tekka.png",
   };
 
+  // Pixel sizes close to the original CSS/emoji icons
+  const ART_PX = { sm: 20, md: 22, lg: 32, plate: 18, order: 20, ing: 20 };
   function artImg(file, alt, size) {
-    const sz = size ? " size-" + size : "";
+    const key = size || "md";
+    const px = ART_PX[key] || ART_PX.md;
+    const sz = " size-" + key;
     return (
       '<img class="sushi-art' +
       sz +
@@ -213,7 +217,15 @@
       file +
       '" alt="' +
       (alt || "") +
-      '" draggable="false" />'
+      '" width="' +
+      px +
+      '" height="' +
+      px +
+      '" style="width:' +
+      px +
+      "px;height:" +
+      px +
+      'px;object-fit:contain;display:block;margin:0 auto;" draggable="false" />'
     );
   }
 
@@ -552,7 +564,7 @@
       btn.dataset.ingId = id;
       btn.innerHTML =
         '<span class="ing-icon">' +
-        ingredientIconHTML(id, "sm") +
+        ingredientIconHTML(id, "ing") +
         '</span><span class="ing-name">' +
         ing.name +
         "</span>";
@@ -594,7 +606,7 @@
 
     const icon = document.createElement("span");
     icon.className = "plate-icon";
-    icon.innerHTML = finishedSushiIconHTML(plate.sushi, "sm");
+    icon.innerHTML = finishedSushiIconHTML(plate.sushi, "plate");
     el.appendChild(icon);
 
     const label = document.createElement("span");
@@ -640,7 +652,7 @@
       "</div>" +
       '<div class="customer-order">' +
       '<span class="customer-order-icon">' +
-      finishedSushiIconHTML(sushi, "md") +
+      finishedSushiIconHTML(sushi, "order") +
       "</span>" +
       '<span class="customer-order-name">' +
       sushi.name +

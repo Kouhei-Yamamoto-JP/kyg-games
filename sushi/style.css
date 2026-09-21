@@ -1476,9 +1476,12 @@ body {
 .plate .sushi-art,
 .plate .sushi-art.size-sm,
 .plate .sushi-art.size-md,
-.plate .sushi-art.size-lg {
-  width: 28px !important;
-  height: 28px !important;
+.plate .sushi-art.size-lg,
+.plate .sushi-art.size-plate {
+  width: 18px !important;
+  height: 18px !important;
+  max-width: 18px !important;
+  max-height: 18px !important;
 }
 .plate {
   overflow: hidden;
@@ -1499,9 +1502,12 @@ body {
 .customer-order-icon .sushi-art,
 .customer-order-icon .sushi-art.size-sm,
 .customer-order-icon .sushi-art.size-md,
-.customer-order-icon .sushi-art.size-lg {
-  width: 28px !important;
-  height: 28px !important;
+.customer-order-icon .sushi-art.size-lg,
+.customer-order-icon .sushi-art.size-order {
+  width: 20px !important;
+  height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
 }
 .customer {
   overflow: hidden;
@@ -1556,9 +1562,10 @@ body {
   .plate .sushi-art,
   .plate .sushi-art.size-sm,
   .plate .sushi-art.size-md,
-  .plate .sushi-art.size-lg {
-    width: 22px !important;
-    height: 22px !important;
+  .plate .sushi-art.size-lg,
+  .plate .sushi-art.size-plate {
+    width: 16px !important;
+    height: 16px !important;
   }
   .plate-label {
     font-size: 0.45rem;
@@ -1571,8 +1578,9 @@ body {
   }
   .customer-order-icon .sushi-art,
   .customer-order-icon .sushi-art.size-sm,
-  .customer-order-icon .sushi-art.size-md {
-    width: 22px !important;
-    height: 22px !important;
+  .customer-order-icon .sushi-art.size-md,
+  .customer-order-icon .sushi-art.size-order {
+    width: 18px !important;
+    height: 18px !important;
   }
 }

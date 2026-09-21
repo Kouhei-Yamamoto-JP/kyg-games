@@ -655,7 +655,9 @@ body {
 /* Toast */
 .toast {
   position: absolute;
-  bottom: calc(148px + var(--safe-bottom));
+  /* クラフト欄・プレビューと被らないよう画面上部（HUD直下）へ */
+  top: calc(56px + env(safe-area-inset-top, 0px));
+  bottom: auto;
   left: 50%;
   transform: translateX(-50%);
   background: rgba(0, 0, 0, 0.8);
@@ -664,16 +666,17 @@ body {
   border-radius: 999px;
   font-weight: 700;
   font-size: 0.9rem;
-  z-index: 20;
+  z-index: 40;
   pointer-events: none;
   white-space: nowrap;
-  max-width: 90%;
+  max-width: min(92%, 420px);
   overflow: hidden;
   text-overflow: ellipsis;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .toast .sushi-icon {
@@ -766,7 +769,8 @@ body {
     padding-bottom: 6px;
   }
   .toast {
-    bottom: calc(130px + var(--safe-bottom));
+    top: calc(64px + env(safe-area-inset-top, 0px));
+    bottom: auto;
   }
 }
 

@@ -56,7 +56,7 @@
   // お客さんのベルト座席（楕円 progress 0..1、上弧付近）
   // progress 0 = 上端、時計回り
   const CUSTOMER_SEATS = [0.86, 0.93, 0.0, 0.07, 0.14];
-  const SERVE_WINDOW = 0.038; // 座席との距離がこれ以下で自動配膳
+  const SERVE_WINDOW = 0.085; // 座席に近づいたら早めに自動配膳
   const FRONT_PROGRESS = 0.5; // 手前（クラフトパネル側）
 
   const FACES = ["🙂", "😊", "🤓", "😎", "🤗", "😋", "🧒", "👩", "👨", "🧓"];
@@ -75,10 +75,10 @@
 
   // —— 難易度（やさしめ） ——
   const MAX_LIVES = 5;
-  const BASE_PATIENCE = 23000;
-  const MIN_PATIENCE = 12000;
+  const BASE_PATIENCE = 36000;
+  const MIN_PATIENCE = 22000;
   const PLATE_COUNT = 12;
-  const BASE_SPEED = 0.038;
+  const BASE_SPEED = 0.048;
   const SPAWN_CUSTOMER_EVERY = 24000;
   const MAX_CUSTOMERS = 5;
   const POINTS_CORRECT = 100;

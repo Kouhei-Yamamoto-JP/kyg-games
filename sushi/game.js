@@ -78,7 +78,7 @@
   const BASE_PATIENCE = 23000;
   const MIN_PATIENCE = 12000;
   const PLATE_COUNT = 8;
-  const BASE_SPEED = 0.028;
+  const BASE_SPEED = 0.038;
   const SPAWN_CUSTOMER_EVERY = 24000;
   const MAX_CUSTOMERS = 5;
   const POINTS_CORRECT = 100;

@@ -1444,3 +1444,135 @@ body {
     font-size: 0.65rem;
   }
 }
+
+/* PNG sushi art — always fit containers (native PNGs are 256px) */
+.sushi-art {
+  display: block;
+  width: 32px;
+  height: 32px;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  pointer-events: none !important;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.sushi-art.size-sm { width: 24px; height: 24px; }
+.sushi-art.size-md { width: 32px; height: 32px; }
+.sushi-art.size-lg { width: 44px; height: 44px; }
+
+.plate-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  max-width: 70%;
+  max-height: 70%;
+  overflow: hidden;
+  line-height: 0;
+}
+.plate .sushi-art,
+.plate .sushi-art.size-sm,
+.plate .sushi-art.size-md,
+.plate .sushi-art.size-lg {
+  width: 28px !important;
+  height: 28px !important;
+}
+.plate {
+  overflow: hidden;
+}
+
+.customer-order-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  height: 30px;
+  min-height: 30px;
+  max-height: 30px;
+  overflow: hidden;
+  line-height: 0;
+}
+.customer-order-icon .sushi-art,
+.customer-order-icon .sushi-art.size-sm,
+.customer-order-icon .sushi-art.size-md,
+.customer-order-icon .sushi-art.size-lg {
+  width: 28px !important;
+  height: 28px !important;
+}
+.customer {
+  overflow: hidden;
+}
+.customer-order {
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.ing-btn .sushi-art,
+.ing-btn .sushi-art.size-sm {
+  width: 26px !important;
+  height: 26px !important;
+  margin: 0 auto;
+}
+.craft-preview .sushi-art,
+.craft-preview .sushi-art.size-lg {
+  width: 40px !important;
+  height: 40px !important;
+}
+.toast .sushi-art {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+@media (min-width: 600px) {
+  .plate .sushi-art,
+  .plate .sushi-art.size-sm,
+  .plate .sushi-art.size-md {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .customer-order-icon {
+    height: 34px;
+    min-height: 34px;
+    max-height: 34px;
+  }
+  .customer-order-icon .sushi-art,
+  .customer-order-icon .sushi-art.size-md {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .plate {
+    width: 50px;
+    height: 50px;
+    margin-left: -25px;
+    margin-top: -25px;
+  }
+  .plate .sushi-art,
+  .plate .sushi-art.size-sm,
+  .plate .sushi-art.size-md,
+  .plate .sushi-art.size-lg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  .plate-label {
+    font-size: 0.45rem;
+    max-width: 44px;
+  }
+  .customer-order-icon {
+    height: 24px;
+    min-height: 24px;
+    max-height: 24px;
+  }
+  .customer-order-icon .sushi-art,
+  .customer-order-icon .sushi-art.size-sm,
+  .customer-order-icon .sushi-art.size-md {
+    width: 22px !important;
+    height: 22px !important;
+  }
+}

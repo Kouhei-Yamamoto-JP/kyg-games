@@ -13,12 +13,12 @@
     <section id="start-screen" class="screen">
       <div class="panel">
         <h1 class="title">🍣 回転寿司</h1>
-        <p class="subtitle">ベルトの寿司をタッチしてお客さんに届けよう！</p>
+        <p class="subtitle">材料で寿司を作ってレーンに出し、注文のお客さんに届けよう！</p>
         <ul class="howto">
-          <li>動くお皿をタップ／クリック</li>
-          <li>注文と合う寿司を届けるとスコア！</li>
-          <li>間違える・時間切れでライフ減少</li>
-          <li>ライフが 0 でゲームオーバー</li>
+          <li>材料で寿司を作る（にぎり／軍艦／巻物）</li>
+          <li>「レーンに出す」で空き皿に乗せる</li>
+          <li>注文と合う皿をタップして配膳</li>
+          <li>間違える・時間切れでライフ減少（❤️×3）</li>
         </ul>
         <button id="btn-start" class="btn primary" type="button">スタート</button>
       </div>
@@ -49,6 +49,13 @@
           <div id="plates"></div>
         </div>
         <div class="shop-sign">回転寿司</div>
+      </div>
+
+      <div id="craft-panel" aria-label="寿司づくり">
+        <div id="craft-progress" class="craft-progress">材料を選んでね</div>
+        <div id="craft-preview" class="craft-preview" aria-hidden="true">🍽️</div>
+        <div id="craft-ingredients" class="craft-ingredients" role="group" aria-label="材料"></div>
+        <button id="btn-place" class="btn place" type="button" disabled>レーンに出す</button>
       </div>
 
       <div id="toast" class="toast hidden" aria-live="polite"></div>

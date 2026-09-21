@@ -104,7 +104,7 @@
   const RankingAPI = {
     STORAGE_KEY: "kyg-sushi-ranking-v1",
     REMOTE_URL: "https://api.kyg-style.com/sushi/rank/",
-    MAX_ENTRIES: 20,
+    MAX_ENTRIES: 100,
 
     normalizeEntry(entry) {
       return {

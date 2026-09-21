@@ -48,12 +48,12 @@ function db(): PDO
 /**
  * @return list<array{name:string,score:int,level:int,served:int,date:string,durationSec:int}>
  */
-function fetchTop20(PDO $pdo): array
+function fetchTop(PDO $pdo): array
 {
     $sql = 'SELECT name, score, level, served, duration_sec, created_at
             FROM scores
             ORDER BY score DESC, duration_sec ASC, created_at ASC
-            LIMIT 20';
+            LIMIT 100';
     $stmt = $pdo->query($sql);
     $rows = $stmt->fetchAll();
     $out = [];
@@ -89,7 +89,7 @@ try {
 
     if ($method === 'GET') {
         $pdo = db();
-        jsonOk(fetchTop20($pdo));
+        jsonOk(fetchTop($pdo));
         exit;
     }
 
@@ -146,7 +146,7 @@ try {
             ':duration_sec' => $durationSec,
         ]);
 
-        jsonOk(fetchTop20($pdo));
+        jsonOk(fetchTop($pdo));
         exit;
     }
 

@@ -1856,3 +1856,11 @@ body {
   margin: 10px auto 0;
   text-align: center;
 }
+
+/* National ranking: allow scrolling through TOP100 */
+.ranking-panel .ranking-list {
+  max-height: min(52dvh, 420px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 4px;
+}

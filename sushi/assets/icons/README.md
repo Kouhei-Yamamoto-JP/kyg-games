@@ -15,5 +15,16 @@ Generated with Codex `gpt-5.6-luna` + built-in `image_gen` (realistic sushi food
 | `gunkan-uni.png` | Uni gunkan | うに軍艦 |
 | `maki-kappa.png` | Kappa maki — 4 upright pieces (conveyor-sushi style) | かっぱ巻 |
 | `maki-tekka.png` | Tekka maki — 4 upright pieces (conveyor-sushi style) | 鉄火巻 |
+| `nigiri-hamachi.png` | Yellowtail (hamachi) nigiri | はまち握り |
+| `nigiri-hotate.png` | Scallop (hotate) nigiri | ほたて握り |
+| `gunkan-corn.png` | Corn gunkan | コーン軍艦 |
+| `gunkan-negitoro.png` | Negitoro gunkan | ねぎとろ軍艦 |
+| `maki-natto.png` | Natto maki — 4 upright pieces (conveyor-sushi style) | 納豆巻 |
+| `neta-hamachi.png` | Hamachi slice (topping only) | はまち（ネタ） |
+| `neta-hotate.png` | Scallop alone (topping only) | ほたて（ネタ） |
+| `neta-corn.png` | Corn kernels mound (topping only) | コーン（ネタ） |
+| `neta-negitoro.png` | Negitoro mound (topping only) | ねぎとろ（ネタ） |
+| `neta-natto.png` | Natto sticky beans (topping only) | 納豆（ネタ） |
 
 All files: square 256×256, RGBA with true alpha background.
+Postprocess: magenta (#FF00FF) chroma-key only (edge flood-fill); near-black nori is never knocked out.

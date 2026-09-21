@@ -204,7 +204,7 @@
   };
 
   // Pixel sizes close to the original CSS/emoji icons
-  const ART_PX = { sm: 20, md: 22, lg: 32, plate: 18, order: 20, ing: 20 };
+  const ART_PX = { sm: 18, md: 20, lg: 22, plate: 18, order: 20, ing: 20, preview: 20 };
   function artImg(file, alt, size) {
     const key = size || "md";
     const px = ART_PX[key] || ART_PX.md;
@@ -289,12 +289,12 @@
 
   function previewIconHTML(steps, analysis) {
     if (analysis.done) {
-      return finishedSushiIconHTML(analysis.done, "lg");
+      return finishedSushiIconHTML(analysis.done, "preview");
     }
     if (steps.length === 0) {
       return wrapIcon("empty-dish", "", "lg");
     }
-    return steps.map((id) => ingredientIconHTML(id, "md")).join("");
+    return steps.map((id) => ingredientIconHTML(id, "preview")).join("");
   }
 
   function progressDist(a, b) {

@@ -1420,9 +1420,10 @@ body {
     pointer-events: none !important;
   }
   .craft-preview .sushi-art,
-  .craft-preview .sushi-art.size-lg {
-    width: 36px !important;
-    height: 36px !important;
+  .craft-preview .sushi-art.size-lg,
+  .craft-preview .sushi-art.size-preview {
+    width: 18px !important;
+    height: 18px !important;
   }
   .craft-ingredients {
     z-index: 20;
@@ -1431,14 +1432,15 @@ body {
   }
   .ing-btn {
     z-index: 21;
-    min-width: 58px;
-    min-height: 52px;
-    padding: 4px 4px 6px;
+    min-width: 52px;
+    min-height: 44px;
+    padding: 3px 3px 5px;
   }
   .ing-btn .sushi-art,
-  .ing-btn .sushi-art.size-sm {
-    width: 24px !important;
-    height: 24px !important;
+  .ing-btn .sushi-art.size-sm,
+  .ing-btn .sushi-art.size-ing {
+    width: 18px !important;
+    height: 18px !important;
   }
   .ing-btn .ing-name {
     font-size: 0.65rem;
@@ -1448,8 +1450,8 @@ body {
 /* PNG sushi art — always fit containers (native PNGs are 256px) */
 .sushi-art {
   display: block;
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
@@ -1458,9 +1460,13 @@ body {
   user-select: none;
   -webkit-user-drag: none;
 }
-.sushi-art.size-sm { width: 24px; height: 24px; }
-.sushi-art.size-md { width: 32px; height: 32px; }
-.sushi-art.size-lg { width: 44px; height: 44px; }
+.sushi-art.size-sm,
+.sushi-art.size-plate { width: 18px; height: 18px; }
+.sushi-art.size-md,
+.sushi-art.size-order,
+.sushi-art.size-ing,
+.sushi-art.size-preview { width: 20px; height: 20px; }
+.sushi-art.size-lg { width: 22px; height: 22px; }
 
 .plate-icon {
   display: flex;
@@ -1518,15 +1524,22 @@ body {
 }
 
 .ing-btn .sushi-art,
-.ing-btn .sushi-art.size-sm {
-  width: 26px !important;
-  height: 26px !important;
+.ing-btn .sushi-art.size-sm,
+.ing-btn .sushi-art.size-ing {
+  width: 20px !important;
+  height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
   margin: 0 auto;
 }
 .craft-preview .sushi-art,
-.craft-preview .sushi-art.size-lg {
-  width: 40px !important;
-  height: 40px !important;
+.craft-preview .sushi-art.size-lg,
+.craft-preview .sushi-art.size-preview,
+.craft-preview .sushi-art.size-md {
+  width: 20px !important;
+  height: 20px !important;
+  max-width: 20px !important;
+  max-height: 20px !important;
 }
 .toast .sushi-art {
   width: 22px !important;
@@ -1534,21 +1547,40 @@ body {
 }
 
 @media (min-width: 600px) {
+  /* Keep desktop icons compact — do not enlarge past order size */
   .plate .sushi-art,
-  .plate .sushi-art.size-sm,
-  .plate .sushi-art.size-md {
-    width: 32px !important;
-    height: 32px !important;
+  .plate .sushi-art.size-plate {
+    width: 20px !important;
+    height: 20px !important;
   }
   .customer-order-icon {
-    height: 34px;
-    min-height: 34px;
-    max-height: 34px;
+    height: 28px;
+    min-height: 28px;
+    max-height: 28px;
   }
   .customer-order-icon .sushi-art,
-  .customer-order-icon .sushi-art.size-md {
-    width: 32px !important;
-    height: 32px !important;
+  .customer-order-icon .sushi-art.size-order {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .ing-btn .sushi-art,
+  .ing-btn .sushi-art.size-ing,
+  .craft-preview .sushi-art,
+  .craft-preview .sushi-art.size-preview,
+  .craft-preview .sushi-art.size-lg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .ing-btn {
+    min-width: 56px;
+    min-height: 48px;
+    padding: 4px 6px;
+  }
+  .plate {
+    width: 52px;
+    height: 52px;
+    margin-left: -26px;
+    margin-top: -26px;
   }
 }
 

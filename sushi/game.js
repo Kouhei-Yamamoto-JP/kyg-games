@@ -451,6 +451,8 @@
     craftProgress.textContent = formatProgress(state.craftSteps, analysis);
     craftPreview.innerHTML = previewIconHTML(state.craftSteps, analysis);
     btnPlace.disabled = !analysis.done;
+    craftPreview.classList.toggle("ready", !!analysis.done);
+    craftPanel.classList.toggle("ready", !!analysis.done);
 
     const buttons = craftIngredients.querySelectorAll(".ing-btn");
     buttons.forEach((btn) => {

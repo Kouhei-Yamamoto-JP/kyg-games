@@ -534,19 +534,51 @@ body {
   flex-shrink: 0;
   background: rgba(255, 248, 240, 0.97);
   border-radius: 16px;
-  padding: 8px 10px 10px;
+  padding: 4px 10px 10px;
   box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
   gap: 6px;
   align-items: stretch;
+  position: relative;
+  overflow: visible;
 }
 
 #craft-panel.shake {
   animation: craft-shake 0.35s ease;
 }
 
+.craft-preview {
+  order: 0;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 52px;
+  margin-top: -6px;
+  padding: 4px 8px 2px;
+  text-align: center;
+  line-height: 1;
+  letter-spacing: 0;
+  pointer-events: none;
+  transition: transform 0.18s ease, margin-top 0.18s ease, padding-bottom 0.18s ease;
+}
+
+/* Finished sushi: lift toward belt so it never covers ingredient buttons */
+#craft-preview.ready,
+#craft-panel.ready .craft-preview {
+  transform: translateY(-18px);
+  margin-top: -14px;
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+}
+
 .craft-progress {
+  order: 1;
+  position: relative;
+  z-index: 1;
   text-align: center;
   font-size: 0.82rem;
   font-weight: 700;
@@ -555,19 +587,20 @@ body {
   min-height: 1.35em;
 }
 
-.craft-preview {
-  text-align: center;
-  font-size: 1.6rem;
-  line-height: 1.2;
-  min-height: 1.6em;
-  letter-spacing: 0.08em;
-}
-
 .craft-ingredients {
+  order: 2;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 6px;
+}
+
+#btn-place {
+  order: 3;
+  position: relative;
+  z-index: 1;
 }
 
 .ing-btn {
@@ -721,6 +754,15 @@ body {
   }
   .craft-preview {
     font-size: 1.3rem;
+    min-height: 44px;
+    margin-top: -4px;
+  }
+  #craft-preview.ready,
+  #craft-panel.ready .craft-preview {
+    transform: translateY(-12px);
+    margin-top: -10px;
+    margin-bottom: 2px;
+    padding-bottom: 6px;
   }
   .toast {
     bottom: calc(130px + var(--safe-bottom));
@@ -733,6 +775,22 @@ body {
   }
   .shop-sign {
     display: none;
+  }
+  .craft-preview {
+    min-height: 40px;
+    margin-top: -2px;
+    padding-top: 2px;
+  }
+  #craft-preview.ready,
+  #craft-panel.ready .craft-preview {
+    transform: translateY(-10px);
+    margin-top: -6px;
+    margin-bottom: 0;
+    padding-bottom: 4px;
+  }
+  #craft-panel {
+    padding-top: 2px;
+    gap: 4px;
   }
 }
 
@@ -1094,16 +1152,6 @@ body {
 }
 
 /* Craft / plate / customer icon slots */
-.craft-preview {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-height: 52px;
-  font-size: inherit;
-  letter-spacing: 0;
-}
-
 .craft-preview .sushi-icon + .sushi-icon {
   margin-left: 2px;
 }

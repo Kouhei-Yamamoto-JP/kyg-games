@@ -74,7 +74,7 @@
   ];
 
   // —— 難易度（やさしめ） ——
-  const MAX_LIVES = 3;
+  const MAX_LIVES = 5;
   const BASE_PATIENCE = 23000;
   const MIN_PATIENCE = 12000;
   const PLATE_COUNT = 8;

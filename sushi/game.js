@@ -103,7 +103,7 @@
   // —— ランキング API（リモート ConoHa + localStorage フォールバック） ——
   const RankingAPI = {
     STORAGE_KEY: "kyg-sushi-ranking-v1",
-    REMOTE_URL: "https://api.kyg-style.com/sushi/rank",
+    REMOTE_URL: "https://api.kyg-style.com/sushi/rank/",
     MAX_ENTRIES: 20,
 
     normalizeEntry(entry) {

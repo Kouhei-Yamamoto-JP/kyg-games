@@ -381,9 +381,10 @@ body {
   position: relative;
   width: 100%;
   height: 100%;
-  max-height: 260px;
-  min-height: 160px;
-  border-radius: 48% / 40%;
+  max-height: 220px;
+  min-height: 140px;
+  aspect-ratio: 2.2 / 1;
+  border-radius: 50% / 32%;
   background: linear-gradient(145deg, var(--belt), var(--belt-dark));
   box-shadow:
     inset 0 0 0 14px var(--wood),
@@ -394,11 +395,11 @@ body {
 
 .belt-inner {
   position: absolute;
-  left: 18%;
-  top: 22%;
-  right: 18%;
-  bottom: 22%;
-  border-radius: 45% / 40%;
+  left: 12%;
+  top: 26%;
+  right: 12%;
+  bottom: 26%;
+  border-radius: 50% / 30%;
   background: radial-gradient(ellipse at center, #4a2c1a 0%, #2a1810 70%);
   box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
   display: flex;
@@ -717,8 +718,8 @@ body {
     font-size: 0.58rem;
   }
   #belt-track {
-    max-height: 300px;
-    min-height: 200px;
+    max-height: 240px;
+    min-height: 160px;
   }
   .ing-btn {
     min-width: 72px;
@@ -749,8 +750,8 @@ body {
     font-size: 0.45rem;
   }
   #belt-track {
-    min-height: 130px;
-    max-height: 180px;
+    min-height: 110px;
+    max-height: 150px;
   }
   .craft-preview {
     font-size: 1.3rem;

@@ -86,7 +86,7 @@
   ];
 
   // —— 難易度 ——
-  const MAX_LIVES = 5;
+  const MAX_LIVES = 10;
   const BASE_PATIENCE = 30000;
   const MIN_PATIENCE = 10000;
   const PLATE_COUNT = 20;

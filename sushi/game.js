@@ -54,16 +54,18 @@
   };
 
   // レベルで解放される寿司 ID（累積）
+  // 解放マイルストーン: Lv1〜3は少なめ、以降は5レベルごと
   const LEVEL_UNLOCKS = {
     1: ["maguro", "salmon"],
-    2: ["ebi", "tamago", "kappa"],
-    3: ["ikura", "uni", "tekka"],
-    4: ["hamachi", "hotate"],
-    5: ["corn", "negitoro"],
-    6: ["natto"],
+    2: ["ebi", "tamago"],
+    3: ["ikura", "uni"],
+    5: ["kappa", "tekka"],
+    10: ["hamachi", "hotate"],
+    15: ["corn", "negitoro"],
+    20: ["natto"],
   };
-  const MAX_UNLOCK_LEVEL = 6;
-  const SERVES_PER_LEVEL = 4;
+  const MAX_UNLOCK_LEVEL = 20;
+  const SERVES_PER_LEVEL = 10;
 
   // お客さんのベルト座席（楕円 progress 0..1、上弧付近）
   const CUSTOMER_SEATS = [0.86, 0.93, 0.0, 0.07, 0.14];
@@ -88,9 +90,10 @@
   const MAX_LIVES = 10;
   const FIXED_PATIENCE = 30000; // お客さん待機は常に30秒固定
   const PLATE_COUNT = 20;
-  const BASE_SPEED = 0.040;
-  const SPAWN_CUSTOMER_EVERY = 36000;
+  const BASE_SPEED = 0.048;
+  const SPAWN_CUSTOMER_EVERY = 24000;
   const MAX_CUSTOMERS = 5;
+  const EARLY_MAX_CUSTOMERS = 3; // Lv3まで
   const POINTS_CORRECT = 100;
   const POINTS_COMBO = 25;
   const START_TIME_MS = 90000;
@@ -249,12 +252,22 @@
 
   function getUnlockedSushiIds(level) {
     const ids = [];
-    const cap = Math.min(level, MAX_UNLOCK_LEVEL);
-    for (let lv = 1; lv <= cap; lv++) {
+    const keys = Object.keys(LEVEL_UNLOCKS)
+      .map(Number)
+      .sort(function (a, b) {
+        return a - b;
+      });
+    for (let i = 0; i < keys.length; i++) {
+      const lv = keys[i];
+      if (lv > level) break;
       const list = LEVEL_UNLOCKS[lv];
       if (list) ids.push.apply(ids, list);
     }
     return ids;
+  }
+
+  function customerCapForLevel(level) {
+    return level <= 3 ? EARLY_MAX_CUSTOMERS : MAX_CUSTOMERS;
   }
 
   function getUnlockedSushi(level) {
@@ -265,13 +278,13 @@
   function getUnlockedTypes(level) {
     const types = ["nigiri"];
     if (level >= 3) types.push("gunkan");
-    if (level >= 4) types.push("maki");
+    if (level >= 5) types.push("maki");
     return types;
   }
 
   function getUnlockedIngredientIds(level) {
     const ids = new Set(["shari"]);
-    if (level >= 3) ids.add("nori");
+    if (level >= 3) ids.add("nori"); // 軍艦・巻物用
     for (const s of getUnlockedSushi(level)) {
       ids.add(s.neta);
     }
@@ -1109,7 +1122,10 @@
       showToastHtml("新ネタ解放！ " + bits.join("　"), "ok", 2000);
     }
     if (target > MAX_UNLOCK_LEVEL && oldLevel >= MAX_UNLOCK_LEVEL) {
-      showToast("レベル " + target + "！お客さんが急ぎ気味…", "ok", 1600);
+      showToast("レベル " + target + "！レーンが少し慌ただしい…", "ok", 1600);
+    }
+    if (oldLevel <= 3 && target > 3) {
+      showToast("お客さんが増えやすくなった！", "ok", 1600);
     }
 
     buildIngredientButtons();
@@ -1246,8 +1262,10 @@
       return;
     }
 
+    const custCap = customerCapForLevel(state.level);
+    if (state.maxActive > custCap) state.maxActive = custCap;
     if (
-      state.maxActive < MAX_CUSTOMERS &&
+      state.maxActive < custCap &&
       state.elapsed - state.lastUnlockAt > SPAWN_CUSTOMER_EVERY
     ) {
       state.lastUnlockAt = state.elapsed;

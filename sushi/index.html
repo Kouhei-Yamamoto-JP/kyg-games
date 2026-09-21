@@ -21,11 +21,14 @@
           <li>時間切れでライフ減少（❤️×5）／レベルアップで新ネタ解放</li>
         </ul>
         <button id="btn-start" class="btn primary" type="button">スタート</button>
+        <a class="back-link" href="../">← ゲーム一覧へ</a>
+        <p class="key-hint">ESC: 一覧へ　／　スペース: 一時停止</p>
       </div>
     </section>
 
     <!-- Game screen -->
     <section id="game-screen" class="screen hidden">
+      <a id="btn-home" class="home-link" href="../" title="ゲーム一覧へ">← 一覧</a>
       <header id="hud">
         <div class="hud-item">
           <span class="hud-label">スコア</span>
@@ -63,6 +66,13 @@
       </div>
 
       <div id="toast" class="toast hidden" aria-live="polite"></div>
+      <div id="pause-overlay" class="pause-overlay hidden" aria-hidden="true">
+        <div class="pause-panel">
+          <p class="pause-title">一時停止</p>
+          <p class="pause-hint">スペースでもう一度 → 再開</p>
+          <a class="back-link" href="../">← ゲーム一覧へ</a>
+        </div>
+      </div>
     </section>
 
     <!-- Game over screen -->
@@ -72,6 +82,7 @@
         <p class="final-score">スコア: <strong id="final-score">0</strong></p>
         <p class="final-hint" id="final-hint"></p>
         <button id="btn-retry" class="btn primary" type="button">もう一度</button>
+        <a class="back-link" href="../">← ゲーム一覧へ</a>
       </div>
     </section>
   </div>

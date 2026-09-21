@@ -100,6 +100,7 @@
   const platesEl = $("#plates");
   const beltTrack = $("#belt-track");
   const toastEl = $("#toast");
+  const pauseOverlay = $("#pause-overlay");
   const finalScoreEl = $("#final-score");
   const finalHintEl = $("#final-hint");
   const craftPanel = $("#craft-panel");
@@ -847,6 +848,11 @@
 
   function tick(ts) {
     if (!state || !state.running) return;
+    if (state.paused) {
+      lastTs = ts;
+      rafId = requestAnimationFrame(tick);
+      return;
+    }
     if (!lastTs) lastTs = ts;
     const dt = Math.min(50, ts - lastTs);
     lastTs = ts;
@@ -904,6 +910,7 @@
 
     state = {
       running: true,
+      paused: false,
       score: 0,
       level: 1,
       lives: MAX_LIVES,
@@ -932,6 +939,10 @@
     resetCraft();
     updateHud();
     renderCustomers(true);
+    if (pauseOverlay) {
+      pauseOverlay.classList.add("hidden");
+      pauseOverlay.setAttribute("aria-hidden", "true");
+    }
     showScreen("game");
 
     requestAnimationFrame(() => {
@@ -968,6 +979,42 @@
     },
     { passive: false }
   );
+
+
+  function setPaused(on) {
+    if (!state || !state.running) return;
+    state.paused = !!on;
+    if (pauseOverlay) {
+      pauseOverlay.classList.toggle("hidden", !state.paused);
+      pauseOverlay.setAttribute("aria-hidden", state.paused ? "false" : "true");
+    }
+    if (!state.paused) lastTs = 0;
+  }
+
+  function togglePause() {
+    if (!state || !state.running) return;
+    setPaused(!state.paused);
+  }
+
+  function goHome() {
+    window.location.href = "../";
+  }
+
+  window.addEventListener("keydown", (e) => {
+    if (e.code === "Escape") {
+      e.preventDefault();
+      goHome();
+      return;
+    }
+    if (e.code === "Space") {
+      const tag = (e.target && e.target.tagName) || "";
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "BUTTON" || tag === "A") return;
+      if (!gameScreen.classList.contains("hidden") && state && state.running) {
+        e.preventDefault();
+        togglePause();
+      }
+    }
+  });
 
   buildIngredientButtons();
   showScreen("start");

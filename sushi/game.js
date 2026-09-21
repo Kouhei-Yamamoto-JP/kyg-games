@@ -87,8 +87,7 @@
 
   // —— 難易度 ——
   const MAX_LIVES = 10;
-  const BASE_PATIENCE = 30000;
-  const MIN_PATIENCE = 10000;
+  const FIXED_PATIENCE = 30000; // お客さん待機は常に30秒固定
   const PLATE_COUNT = 20;
   const BASE_SPEED = 0.048;
   const SPAWN_CUSTOMER_EVERY = 24000;
@@ -805,10 +804,7 @@
     const sushi = pickSushi();
     const face = FACES[Math.floor(Math.random() * FACES.length)];
     const name = NAMES[Math.floor(Math.random() * NAMES.length)];
-    const scorePenalty = Math.min(12000, Math.floor(state.score / 250) * 500);
-    const levelPenalty = Math.max(0, state.level - 1) * 800;
-    const scaled = BASE_PATIENCE - scorePenalty - levelPenalty;
-    const maxP = Math.max(MIN_PATIENCE, scaled);
+    const maxP = FIXED_PATIENCE;
 
     const el = document.createElement("div");
     el.className = "customer";

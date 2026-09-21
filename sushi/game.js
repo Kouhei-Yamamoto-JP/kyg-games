@@ -56,15 +56,14 @@
   // レベルで解放される寿司 ID（累積）
   const LEVEL_UNLOCKS = {
     1: ["maguro", "salmon"],
-    2: ["ebi", "tamago"],
-    3: ["ikura", "uni"],
-    4: ["kappa", "tekka"],
-    5: ["hamachi", "hotate"],
-    6: ["corn", "negitoro"],
-    7: ["natto"],
+    2: ["ebi", "tamago", "kappa"],
+    3: ["ikura", "uni", "tekka"],
+    4: ["hamachi", "hotate"],
+    5: ["corn", "negitoro"],
+    6: ["natto"],
   };
-  const MAX_UNLOCK_LEVEL = 7;
-  const SERVES_PER_LEVEL = 6;
+  const MAX_UNLOCK_LEVEL = 6;
+  const SERVES_PER_LEVEL = 4;
 
   // お客さんのベルト座席（楕円 progress 0..1、上弧付近）
   const CUSTOMER_SEATS = [0.86, 0.93, 0.0, 0.07, 0.14];
@@ -89,14 +88,14 @@
   const MAX_LIVES = 10;
   const FIXED_PATIENCE = 30000; // お客さん待機は常に30秒固定
   const PLATE_COUNT = 20;
-  const BASE_SPEED = 0.048;
-  const SPAWN_CUSTOMER_EVERY = 24000;
+  const BASE_SPEED = 0.040;
+  const SPAWN_CUSTOMER_EVERY = 36000;
   const MAX_CUSTOMERS = 5;
   const POINTS_CORRECT = 100;
   const POINTS_COMBO = 25;
-  const START_TIME_MS = 60000;
+  const START_TIME_MS = 90000;
   const MAX_SESSION_MS = 600000;
-  const SERVE_BONUS_MS = 10000;
+  const SERVE_BONUS_MS = 12000;
   const RANK_NAME_MAX = 12;
 
   // —— ランキング API（リモート ConoHa + localStorage フォールバック） ——

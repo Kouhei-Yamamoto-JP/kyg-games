@@ -84,6 +84,69 @@ function jsonErr(string $message, int $code = 400): void
     echo json_encode(['ok' => false, 'error' => $message], JSON_UNESCAPED_UNICODE);
 }
 
+
+/**
+ * ランキング名のNG判定（スペース・記号を除去して検査）
+ */
+function normalizeRankNameForFilter(string $name): string
+{
+    $s = $name;
+    if (class_exists('Normalizer')) {
+        $n = \Normalizer::normalize($s, \Normalizer::FORM_KC);
+        if (is_string($n) && $n !== '') {
+            $s = $n;
+        }
+    }
+    if (function_exists('mb_convert_kana')) {
+        $s = mb_convert_kana($s, 'c', 'UTF-8'); // 全角カナ→ひらがな寄りは 'c' でカタカナ→ひらがな
+    }
+    if (function_exists('mb_strtolower')) {
+        $s = mb_strtolower($s, 'UTF-8');
+    } else {
+        $s = strtolower($s);
+    }
+    $s = strtr($s, [
+        '0' => 'o', '1' => 'i', '3' => 'e', '4' => 'a', '5' => 's', '7' => 't', '@' => 'a',
+        '０' => 'o', '１' => 'i', '３' => 'e', '４' => 'a', '５' => 's', '７' => 't',
+    ]);
+    $s = preg_replace('/[^\p{L}\p{N}]+/u', '', $s);
+    return is_string($s) ? $s : '';
+}
+
+function rankNameBlockedWords(): array
+{
+    return [
+        'ちんこ', 'ちんぽ', 'まんこ', 'おまんこ', 'おっぱい', 'ぱいぱい',
+        'せっくす', 'へんたい', 'やりまん', 'やりちん',
+        'うんこ', 'きんたま', 'くぱあ', 'あなる', 'れいぷ', 'れーぷ',
+        'fuck', 'fck', 'shit', 'bitch', 'asshole', 'dick', 'pussy', 'penis', 'vagina', 'sex', 'porn', 'rape',
+        'きちがい', 'びっこ', 'めくら', 'つんぼ',
+        'くろんぼ', '部落',
+        'しね', 'ころせ', 'ころす',
+        'nigger', 'nigga', 'faggot', 'retard', 'chink',
+    ];
+}
+
+function isRankNameBlocked(string $name): bool
+{
+    $norm = normalizeRankNameForFilter($name);
+    if ($norm === '') {
+        return false;
+    }
+    foreach (rankNameBlockedWords() as $w) {
+        $nw = normalizeRankNameForFilter($w);
+        if ($nw !== '' && function_exists('mb_strpos')) {
+            if (mb_strpos($norm, $nw, 0, 'UTF-8') !== false) {
+                return true;
+            }
+        } elseif ($nw !== '' && strpos($norm, $nw) !== false) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 try {
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
@@ -102,6 +165,10 @@ try {
         }
 
         $name = isset($data['name']) ? trim((string) $data['name']) : '';
+        if ($name !== '' && isRankNameBlocked($name)) {
+            jsonErr('その名前は使えません', 400);
+            exit;
+        }
         if ($name === '') {
             $name = 'ななし';
         }

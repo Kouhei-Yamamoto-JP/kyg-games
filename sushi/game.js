@@ -101,6 +101,51 @@
   const SERVE_BONUS_MS = 12000;
   const RANK_NAME_MAX = 12;
 
+
+  // —— ランキング名フィルター（スペース・記号除去後に照合） ——
+  const RANK_NAME_BLOCKLIST = [
+    "ちんこ", "ちんぽ", "まんこ", "おまんこ", "おっぱい", "ぱいぱい",
+    "せっくす", "へんたい", "やりまん", "やりちん",
+    "うんこ", "きんたま", "くぱあ", "あなる", "れいぷ", "れーぷ",
+    "fuck", "fck", "shit", "bitch", "asshole", "dick", "pussy", "penis", "vagina", "sex", "porn", "rape",
+    "きちがい", "びっこ", "めくら", "つんぼ",
+    "くろんぼ", "部落",
+    "しね", "ころせ", "ころす",
+    "nigger", "nigga", "faggot", "retard", "chink",
+  ];
+
+  function normalizeRankNameForFilter(name) {
+    let s = String(name || "");
+    try {
+      s = s.normalize("NFKC");
+    } catch (e) {}
+    // カタカナ→ひらがな
+    s = s.replace(/[\u30a1-\u30f6]/g, (ch) =>
+      String.fromCharCode(ch.charCodeAt(0) - 0x60)
+    );
+    s = s.toLowerCase();
+    s = s.replace(/[013457@０１３４５７]/g, (ch) => {
+      const map = {
+        "0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "@": "a",
+        "０": "o", "１": "i", "３": "e", "４": "a", "５": "s", "７": "t",
+      };
+      return map[ch] || ch;
+    });
+    // 字母・数字以外を除去（スペース・記号・絵文字など）
+    s = s.replace(/[^\p{L}\p{N}]/gu, "");
+    return s;
+  }
+
+  function isRankNameBlocked(name) {
+    const norm = normalizeRankNameForFilter(name);
+    if (!norm) return false;
+    for (let i = 0; i < RANK_NAME_BLOCKLIST.length; i++) {
+      const w = normalizeRankNameForFilter(RANK_NAME_BLOCKLIST[i]);
+      if (w && norm.indexOf(w) !== -1) return true;
+    }
+    return false;
+  }
+
   // —— ランキング API（リモート ConoHa + localStorage フォールバック） ——
   const RankingAPI = {
     STORAGE_KEY: "kyg-sushi-ranking-v1",
@@ -173,6 +218,11 @@
      */
     async saveScore(entry) {
       const cleaned = this.normalizeEntry(entry);
+      if (cleaned.name && isRankNameBlocked(cleaned.name)) {
+        const err = new Error("その名前は使えません");
+        err.code = "NAME_BLOCKED";
+        throw err;
+      }
       try {
         const res = await fetch(this.REMOTE_URL, {
           method: "POST",
@@ -182,15 +232,20 @@
           },
           body: JSON.stringify(cleaned),
         });
+        const data = await res.json().catch(function () { return null; });
+        if (res.status === 400 && data && data.error) {
+          const err = new Error(data.error);
+          err.code = "NAME_BLOCKED";
+          throw err;
+        }
         if (!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
         if (data && data.ok && Array.isArray(data.entries)) {
-          // 成功時もローカルにミラー（オフライン閲覧用）
           this.writeLocal(data.entries.map((e) => this.normalizeEntry(e)));
           return data.entries.map((e) => this.normalizeEntry(e));
         }
         throw new Error((data && data.error) || "bad response");
       } catch (e) {
+        if (e && e.code === "NAME_BLOCKED") throw e;
         console.warn("RankingAPI.saveScore remote failed, using localStorage", e);
         return this.mergeLocal(cleaned);
       }
@@ -1013,14 +1068,28 @@
   async function submitRanking() {
     if (!state) return;
     const name = (rankNameInput && rankNameInput.value ? rankNameInput.value : "").trim();
-    await RankingAPI.saveScore({
-      name: name || "ななし",
-      score: state.score,
-      level: state.level,
-      served: state.servedTotal,
-      date: new Date().toISOString(),
-      durationSec: state.durationSec || Math.floor(state.elapsed / 1000),
-    });
+    if (name && isRankNameBlocked(name)) {
+      showToast("その名前は使えません", "bad");
+      if (rankNameInput) rankNameInput.focus();
+      return;
+    }
+    try {
+      await RankingAPI.saveScore({
+        name: name || "ななし",
+        score: state.score,
+        level: state.level,
+        served: state.servedTotal,
+        date: new Date().toISOString(),
+        durationSec: state.durationSec || Math.floor(state.elapsed / 1000),
+      });
+    } catch (e) {
+      if (e && e.code === "NAME_BLOCKED") {
+        showToast(e.message || "その名前は使えません", "bad");
+        if (rankNameInput) rankNameInput.focus();
+        return;
+      }
+      throw e;
+    }
     setRankingFormVisible(false);
     await refreshRankingViews(state.score);
     showToast("ランキングに登録したよ", "ok");

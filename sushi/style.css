@@ -1817,3 +1817,38 @@ body {
     font-size: 0.78rem;
   }
 }
+
+/* Start screen actions — same layout on phone and PC */
+.start-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+}
+.start-actions .btn {
+  display: block;
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+}
+.start-actions .btn.secondary {
+  margin-top: 0;
+}
+#start-screen .back-link {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 16px auto 0;
+  text-align: center;
+  clear: both;
+}
+#start-screen .key-hint {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 10px auto 0;
+  text-align: center;
+}

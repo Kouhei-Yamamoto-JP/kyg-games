@@ -217,8 +217,10 @@ body {
 /* Customers */
 #customers {
   display: flex;
+  flex-direction: row;
   justify-content: flex-start;
-  flex-wrap: nowrap;
+  align-items: stretch;
+  flex-wrap: nowrap !important;
   gap: 6px;
   width: 100%;
   max-width: 640px;
@@ -233,7 +235,10 @@ body {
 }
 
 .customer {
+  flex: 0 0 auto;
   width: 92px;
+  min-width: 92px;
+  max-width: 92px;
   background: #fff8f0;
   border-radius: 14px;
   padding: 6px 6px 8px;
@@ -750,10 +755,15 @@ body {
     font-size: 0.8rem;
   }
   #customers {
-    min-height: 90px;
+    min-height: 0;
+    max-height: 100px;
+    flex-wrap: nowrap !important;
   }
   .customer {
+    flex: 0 0 auto;
     width: 78px;
+    min-width: 78px;
+    max-width: 78px;
     padding: 4px;
   }
   .plate {
@@ -1315,12 +1325,17 @@ body {
     max-height: 96px;
     gap: 4px;
     justify-content: flex-start;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
   .customer {
+    flex: 0 0 auto !important;
     width: 72px;
+    min-width: 72px;
+    max-width: 72px;
     padding: 4px 4px 6px;
     border-radius: 12px;
-    flex: 0 0 auto;
   }
   .customer-face {
     font-size: 1.15rem;
@@ -1369,9 +1384,13 @@ body {
   }
   #customers {
     max-height: 84px;
+    flex-wrap: nowrap !important;
   }
   .customer {
+    flex: 0 0 auto !important;
     width: 64px;
+    min-width: 64px;
+    max-width: 64px;
   }
   #belt-track {
     min-height: 96px;

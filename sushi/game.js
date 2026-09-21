@@ -57,6 +57,7 @@
   // progress 0 = 上端、時計回り
   const CUSTOMER_SEATS = [0.86, 0.93, 0.0, 0.07, 0.14];
   const SERVE_WINDOW = 0.038; // 座席との距離がこれ以下で自動配膳
+  const FRONT_PROGRESS = 0.5; // 手前（クラフトパネル側）
 
   const FACES = ["🙂", "😊", "🤓", "😎", "🤗", "😋", "🧒", "👩", "👨", "🧓"];
   const NAMES = [
@@ -717,14 +718,15 @@
     }
   }
 
+  // 手前の空き皿に出す
   function findNextEmptyPlate() {
     let best = null;
-    let bestProg = Infinity;
+    let bestDist = Infinity;
     for (const p of state.plates) {
       if (!p.sushi) {
-        const dist = p.progress;
-        if (dist < bestProg) {
-          bestProg = dist;
+        const dist = progressDist(p.progress, FRONT_PROGRESS);
+        if (dist < bestDist) {
+          bestDist = dist;
           best = p;
         }
       }

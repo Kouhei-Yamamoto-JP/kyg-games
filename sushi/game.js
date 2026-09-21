@@ -179,7 +179,45 @@
   }
 
 
-  /** CSS sushi / ingredient icon HTML */
+
+  const ICON_BASE = "assets/icons/";
+  const ING_ICON_FILE = {
+    shari: "shari.png",
+    nori: "nori.png",
+    maguro: "nigiri-maguro.png",
+    salmon: "nigiri-salmon.png",
+    ebi: "nigiri-ebi.png",
+    tamago: "nigiri-tamago.png",
+    ikura: "gunkan-ikura.png",
+    uni: "gunkan-uni.png",
+    cucumber: "maki-kappa.png",
+  };
+  const SUSHI_ICON_FILE = {
+    maguro: "nigiri-maguro.png",
+    salmon: "nigiri-salmon.png",
+    ebi: "nigiri-ebi.png",
+    tamago: "nigiri-tamago.png",
+    ikura: "gunkan-ikura.png",
+    uni: "gunkan-uni.png",
+    kappa: "maki-kappa.png",
+    tekka: "maki-tekka.png",
+  };
+
+  function artImg(file, alt, size) {
+    const sz = size ? " size-" + size : "";
+    return (
+      '<img class="sushi-art' +
+      sz +
+      '" src="' +
+      ICON_BASE +
+      file +
+      '" alt="' +
+      (alt || "") +
+      '" draggable="false" />'
+    );
+  }
+
+  /** CSS sushi / ingredient icon HTML (PNG art preferred) */
   function wrapIcon(classes, inner, size) {
     const sz = size ? " size-" + size : "";
     return (
@@ -194,13 +232,15 @@
 
   function ingredientIconHTML(ingId, size) {
     const sz = size || "sm";
+    const file = ING_ICON_FILE[ingId];
+    const ing = INGREDIENTS[ingId];
+    if (file) return artImg(file, ing ? ing.name : ingId, sz);
     if (ingId === "shari") {
       return wrapIcon("ing shari", '<span class="si-rice"></span>', sz);
     }
     if (ingId === "nori") {
       return wrapIcon("ing nori", '<span class="si-sheet"></span>', sz);
     }
-    // neta topping piece
     return wrapIcon("ing " + ingId, '<span class="si-topping"></span>', sz);
   }
 
@@ -209,6 +249,8 @@
     if (!sushi) {
       return wrapIcon("empty-dish", "", sz);
     }
+    const file = SUSHI_ICON_FILE[sushi.id];
+    if (file) return artImg(file, sushi.name, sz);
     if (sushi.type === "nigiri") {
       return wrapIcon(
         "nigiri " + sushi.neta,
@@ -224,7 +266,6 @@
       );
     }
     if (sushi.type === "maki") {
-      // kappa / tekka use sushi.id for center color
       return wrapIcon(
         "maki " + sushi.id,
         '<span class="si-nori-ring"></span><span class="si-rice-fill"></span><span class="si-center"></span>',
@@ -243,7 +284,6 @@
     }
     return steps.map((id) => ingredientIconHTML(id, "md")).join("");
   }
-
 
   function progressDist(a, b) {
     const d = Math.abs(a - b);

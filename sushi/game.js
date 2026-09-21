@@ -77,7 +77,7 @@
   const MAX_LIVES = 5;
   const BASE_PATIENCE = 36000;
   const MIN_PATIENCE = 22000;
-  const PLATE_COUNT = 12;
+  const PLATE_COUNT = 20;
   const BASE_SPEED = 0.048;
   const SPAWN_CUSTOMER_EVERY = 24000;
   const MAX_CUSTOMERS = 5;
@@ -253,8 +253,8 @@
   function pointOnBelt(t, w, h) {
     const cx = w / 2;
     const cy = h / 2;
-    const rx = w * 0.46;
-    const ry = h * 0.28;
+    const rx = w * 0.47;
+    const ry = h * 0.32;
     const angle = t * Math.PI * 2 - Math.PI / 2;
     return {
       x: cx + Math.cos(angle) * rx,

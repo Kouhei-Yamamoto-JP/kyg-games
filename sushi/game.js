@@ -1,5 +1,5 @@
 /**
- * 回転寿司ゲーム — クラフトしてレーンに出す v2
+ * 回転寿司ゲーム — クラフト→レーン→自動配膳 / レベルでネタ解放
  */
 (function () {
   "use strict";
@@ -24,80 +24,39 @@
     cucumber: { id: "cucumber", name: "きゅうり", emoji: "🥒", kind: "neta" },
   };
 
-  // —— 完成寿司（レシピパス + ネタで決定） ——
+  // —— 完成寿司 ——
   const SUSHI = [
-    {
-      id: "maguro",
-      name: "まぐろ",
-      emoji: "🍣",
-      type: "nigiri",
-      neta: "maguro",
-      weight: 3,
-    },
-    {
-      id: "salmon",
-      name: "サーモン",
-      emoji: "🐟",
-      type: "nigiri",
-      neta: "salmon",
-      weight: 3,
-    },
-    {
-      id: "ebi",
-      name: "えび",
-      emoji: "🦐",
-      type: "nigiri",
-      neta: "ebi",
-      weight: 2,
-    },
-    {
-      id: "tamago",
-      name: "たまご",
-      emoji: "🥚",
-      type: "nigiri",
-      neta: "tamago",
-      weight: 2,
-    },
-    {
-      id: "ikura",
-      name: "いくら",
-      emoji: "🟠",
-      type: "gunkan",
-      neta: "ikura",
-      weight: 2,
-    },
-    {
-      id: "uni",
-      name: "うに",
-      emoji: "🟡",
-      type: "gunkan",
-      neta: "uni",
-      weight: 2,
-    },
-    {
-      id: "kappa",
-      name: "かっぱ巻",
-      emoji: "🥒",
-      type: "maki",
-      neta: "cucumber",
-      weight: 2,
-    },
-    {
-      id: "tekka",
-      name: "鉄火巻",
-      emoji: "🍱",
-      type: "maki",
-      neta: "maguro",
-      weight: 2,
-    },
+    { id: "maguro", name: "まぐろ", emoji: "🍣", type: "nigiri", neta: "maguro", weight: 3 },
+    { id: "salmon", name: "サーモン", emoji: "🐟", type: "nigiri", neta: "salmon", weight: 3 },
+    { id: "ebi", name: "えび", emoji: "🦐", type: "nigiri", neta: "ebi", weight: 2 },
+    { id: "tamago", name: "たまご", emoji: "🥚", type: "nigiri", neta: "tamago", weight: 2 },
+    { id: "ikura", name: "いくら", emoji: "🟠", type: "gunkan", neta: "ikura", weight: 2 },
+    { id: "uni", name: "うに", emoji: "🟡", type: "gunkan", neta: "uni", weight: 2 },
+    { id: "kappa", name: "かっぱ巻", emoji: "🥒", type: "maki", neta: "cucumber", weight: 2 },
+    { id: "tekka", name: "鉄火巻", emoji: "🍱", type: "maki", neta: "maguro", weight: 2 },
   ];
 
-  // タイプ別に使えるネタ
+  // タイプ別に使えるネタ（全体）
   const NETA_BY_TYPE = {
     nigiri: ["maguro", "salmon", "ebi", "tamago"],
     gunkan: ["ikura", "uni"],
     maki: ["cucumber", "maguro"],
   };
+
+  // レベルで解放される寿司 ID（累積）
+  const LEVEL_UNLOCKS = {
+    1: ["maguro", "salmon"],
+    2: ["ebi", "tamago"],
+    3: ["ikura", "uni"],
+    4: ["kappa", "tekka"],
+  };
+  const MAX_UNLOCK_LEVEL = 4;
+  const SERVES_PER_LEVEL = 6;
+
+  // お客さんのベルト座席（楕円 progress 0..1、上弧付近）
+  // progress 0 = 上端、時計回り
+  const CUSTOMER_SEATS = [0.86, 0.93, 0.0, 0.07, 0.14];
+  const SERVE_WINDOW = 0.038; // 座席との距離がこれ以下で自動配膳
 
   const FACES = ["🙂", "😊", "🤓", "😎", "🤗", "😋", "🧒", "👩", "👨", "🧓"];
   const NAMES = [
@@ -115,10 +74,10 @@
 
   // —— 難易度（やさしめ） ——
   const MAX_LIVES = 3;
-  const BASE_PATIENCE = 23000; // ms (~23s)
+  const BASE_PATIENCE = 23000;
   const MIN_PATIENCE = 12000;
   const PLATE_COUNT = 8;
-  const BASE_SPEED = 0.028; // slower belt (full lap ≈ 36s)
+  const BASE_SPEED = 0.028;
   const SPAWN_CUSTOMER_EVERY = 24000;
   const MAX_CUSTOMERS = 5;
   const POINTS_CORRECT = 100;
@@ -133,6 +92,7 @@
   const btnRetry = $("#btn-retry");
   const btnPlace = $("#btn-place");
   const scoreEl = $("#score");
+  const levelEl = $("#level");
   const livesEl = $("#lives");
   const customerCountEl = $("#customer-count");
   const customersEl = $("#customers");
@@ -162,8 +122,50 @@
     return list[list.length - 1];
   }
 
+  function getUnlockedSushiIds(level) {
+    const ids = [];
+    const cap = Math.min(level, MAX_UNLOCK_LEVEL);
+    for (let lv = 1; lv <= cap; lv++) {
+      const list = LEVEL_UNLOCKS[lv];
+      if (list) ids.push.apply(ids, list);
+    }
+    return ids;
+  }
+
+  function getUnlockedSushi(level) {
+    const ids = new Set(getUnlockedSushiIds(level));
+    return SUSHI.filter((s) => ids.has(s.id));
+  }
+
+  function getUnlockedTypes(level) {
+    const types = ["nigiri"];
+    if (level >= 3) types.push("gunkan");
+    if (level >= 4) types.push("maki");
+    return types;
+  }
+
+  function getUnlockedIngredientIds(level) {
+    const ids = new Set(["shari"]);
+    if (level >= 3) ids.add("nori"); // 軍艦・巻物
+    for (const s of getUnlockedSushi(level)) {
+      ids.add(s.neta);
+    }
+    return ids;
+  }
+
+  function availableNetasForType(typeId, level) {
+    const unlocked = new Set(getUnlockedSushiIds(level));
+    const all = NETA_BY_TYPE[typeId] || [];
+    return all.filter((netaId) => {
+      const sushi = findSushiByTypeAndNeta(typeId, netaId);
+      return sushi && unlocked.has(sushi.id);
+    });
+  }
+
   function pickSushi() {
-    return weightedPick(SUSHI);
+    const list = getUnlockedSushi(state.level);
+    if (!list.length) return SUSHI[0];
+    return weightedPick(list);
   }
 
   function findSushiByTypeAndNeta(typeId, netaId) {
@@ -172,6 +174,11 @@
 
   function typeLabel(typeId) {
     return (TYPES[typeId] && TYPES[typeId].label) || typeId;
+  }
+
+  function progressDist(a, b) {
+    const d = Math.abs(a - b);
+    return Math.min(d, 1 - d);
   }
 
   /** 楕円軌道上の点 (progress 0..1) */
@@ -187,16 +194,17 @@
     };
   }
 
-  // —— クラフト推論 ——
-  /**
-   * steps から現在の仮説タイプと次に有効な材料を返す
-   * steps: string[] of ingredient ids
-   */
+  // —— クラフト推論（解放済みのみ） ——
   function analyzeCraft(steps) {
+    const level = state ? state.level : 1;
+    const unlockedTypes = getUnlockedTypes(level);
+
     if (steps.length === 0) {
+      const nextKinds = ["shari"];
+      if (unlockedTypes.includes("maki")) nextKinds.push("nori");
       return {
-        candidates: ["nigiri", "gunkan", "maki"],
-        nextKinds: ["shari", "nori"],
+        candidates: unlockedTypes.slice(),
+        nextKinds,
         nextNetas: null,
         done: null,
         invalid: false,
@@ -207,6 +215,9 @@
 
     // 海苔スタート → 巻物のみ
     if (first === "nori") {
+      if (!unlockedTypes.includes("maki")) {
+        return { candidates: [], nextKinds: [], nextNetas: null, done: null, invalid: true };
+      }
       if (steps.length === 1) {
         return {
           candidates: ["maki"],
@@ -223,14 +234,14 @@
         return {
           candidates: ["maki"],
           nextKinds: ["neta"],
-          nextNetas: NETA_BY_TYPE.maki.slice(),
+          nextNetas: availableNetasForType("maki", level),
           done: null,
           invalid: false,
         };
       }
-      // steps[2] = neta
       const sushi = findSushiByTypeAndNeta("maki", steps[2]);
-      if (!sushi || steps.length > 3) {
+      const unlocked = getUnlockedSushiIds(level);
+      if (!sushi || steps.length > 3 || unlocked.indexOf(sushi.id) < 0) {
         return { candidates: [], nextKinds: [], nextNetas: null, done: null, invalid: true };
       }
       return {
@@ -245,28 +256,37 @@
     // シャリスタート → にぎり or 軍艦
     if (first === "shari") {
       if (steps.length === 1) {
+        const cands = ["nigiri"];
+        const nextKinds = ["neta"];
+        if (unlockedTypes.includes("gunkan")) {
+          cands.push("gunkan");
+          nextKinds.push("nori");
+        }
         return {
-          candidates: ["nigiri", "gunkan"],
-          nextKinds: ["nori", "neta"],
-          nextNetas: NETA_BY_TYPE.nigiri.slice(),
+          candidates: cands,
+          nextKinds,
+          nextNetas: availableNetasForType("nigiri", level),
           done: null,
           invalid: false,
         };
       }
       const second = steps[1];
-      // 軍艦: シャリ → 海苔 → ネタ
       if (second === "nori") {
+        if (!unlockedTypes.includes("gunkan")) {
+          return { candidates: [], nextKinds: [], nextNetas: null, done: null, invalid: true };
+        }
         if (steps.length === 2) {
           return {
             candidates: ["gunkan"],
             nextKinds: ["neta"],
-            nextNetas: NETA_BY_TYPE.gunkan.slice(),
+            nextNetas: availableNetasForType("gunkan", level),
             done: null,
             invalid: false,
           };
         }
         const sushi = findSushiByTypeAndNeta("gunkan", steps[2]);
-        if (!sushi || steps.length > 3) {
+        const unlocked = getUnlockedSushiIds(level);
+        if (!sushi || steps.length > 3 || unlocked.indexOf(sushi.id) < 0) {
           return { candidates: [], nextKinds: [], nextNetas: null, done: null, invalid: true };
         }
         return {
@@ -277,10 +297,10 @@
           invalid: false,
         };
       }
-      // にぎり: シャリ → ネタ
       if (INGREDIENTS[second] && INGREDIENTS[second].kind === "neta") {
         const sushi = findSushiByTypeAndNeta("nigiri", second);
-        if (!sushi || steps.length > 2) {
+        const unlocked = getUnlockedSushiIds(level);
+        if (!sushi || steps.length > 2 || unlocked.indexOf(sushi.id) < 0) {
           return { candidates: [], nextKinds: [], nextNetas: null, done: null, invalid: true };
         }
         return {
@@ -294,7 +314,6 @@
       return { candidates: [], nextKinds: [], nextNetas: null, done: null, invalid: true };
     }
 
-    // ネタや不明な開始
     return { candidates: [], nextKinds: [], nextNetas: null, done: null, invalid: true };
   }
 
@@ -315,7 +334,12 @@
       return t + "完成！ 「レーンに出す」で出そう → " + analysis.done.name;
     }
     if (steps.length === 0) {
-      return "にぎり: シャリ→ネタ ／ 軍艦: シャリ→海苔→ネタ ／ 巻物: 海苔→シャリ→ネタ";
+      const types = getUnlockedTypes(state ? state.level : 1);
+      const hints = [];
+      if (types.includes("nigiri")) hints.push("にぎり: シャリ→ネタ");
+      if (types.includes("gunkan")) hints.push("軍艦: シャリ→海苔→ネタ");
+      if (types.includes("maki")) hints.push("巻物: 海苔→シャリ→ネタ");
+      return hints.join(" ／ ");
     }
 
     const cand = analysis.candidates;
@@ -354,7 +378,6 @@
 
   function shakeCraft() {
     craftPanel.classList.remove("shake");
-    // reflow
     void craftPanel.offsetWidth;
     craftPanel.classList.add("shake");
     setTimeout(() => craftPanel.classList.remove("shake"), 400);
@@ -368,7 +391,6 @@
     craftPreview.textContent = previewEmojis(state.craftSteps, analysis);
     btnPlace.disabled = !analysis.done;
 
-    // enable/disable ingredient buttons
     const buttons = craftIngredients.querySelectorAll(".ing-btn");
     buttons.forEach((btn) => {
       const id = btn.dataset.ingId;
@@ -382,7 +404,6 @@
     if (!state || !state.running) return;
     const analysis = analyzeCraft(state.craftSteps);
     if (!isIngredientAllowed(ingId, analysis)) {
-      // 間違った材料 → ライフは減らさず、シェイクしてリセット
       shakeCraft();
       showToast("順番が違うよ！もう一度", "bad");
       resetCraft();
@@ -404,6 +425,8 @@
 
   function buildIngredientButtons() {
     craftIngredients.innerHTML = "";
+    const level = state ? state.level : 1;
+    const unlocked = getUnlockedIngredientIds(level);
     const order = [
       "shari",
       "nori",
@@ -416,6 +439,7 @@
       "cucumber",
     ];
     for (const id of order) {
+      if (!unlocked.has(id)) continue;
       const ing = INGREDIENTS[id];
       const btn = document.createElement("button");
       btn.type = "button";
@@ -437,9 +461,10 @@
       );
       craftIngredients.appendChild(btn);
     }
+    if (state) updateCraftUI();
   }
 
-  // —— お皿 ——
+  // —— お皿（タップ不要・見た目のみ） ——
   function renderPlateContent(plate) {
     const el = plate.el;
     el.innerHTML = "";
@@ -474,11 +499,10 @@
   }
 
   function createEmptyPlate(index, total) {
-    const el = document.createElement("button");
-    el.type = "button";
+    const el = document.createElement("div");
     el.className = "plate empty";
+    el.setAttribute("role", "img");
     el.setAttribute("aria-label", "空き皿");
-    el.addEventListener("pointerdown", onPlatePointer, { passive: false });
     const plate = {
       id: "p" + index + "_" + Date.now(),
       sushi: null,
@@ -490,12 +514,17 @@
     return plate;
   }
 
+  function seatForSlot(slot) {
+    return CUSTOMER_SEATS[slot % CUSTOMER_SEATS.length];
+  }
+
   function createCustomer(slot) {
     const sushi = pickSushi();
     const face = FACES[Math.floor(Math.random() * FACES.length)];
     const name = NAMES[Math.floor(Math.random() * NAMES.length)];
-    const scaled =
-      BASE_PATIENCE - Math.min(8000, Math.floor(state.score / 250) * 400);
+    const scorePenalty = Math.min(8000, Math.floor(state.score / 250) * 400);
+    const levelPenalty = Math.max(0, state.level - MAX_UNLOCK_LEVEL) * 900;
+    const scaled = BASE_PATIENCE - scorePenalty - levelPenalty;
     const maxP = Math.max(MIN_PATIENCE, scaled);
 
     const el = document.createElement("div");
@@ -531,7 +560,16 @@
       patienceMax: maxP,
       el,
       slot,
+      seatProgress: seatForSlot(slot),
+      serving: false,
     };
+  }
+
+  function reassignCustomerSeats() {
+    state.customers.forEach((c, i) => {
+      c.slot = i;
+      c.seatProgress = seatForSlot(i);
+    });
   }
 
   function showScreen(which) {
@@ -542,18 +580,19 @@
 
   function updateHud() {
     scoreEl.textContent = String(state.score);
+    if (levelEl) levelEl.textContent = String(state.level);
     livesEl.textContent =
       "❤️".repeat(state.lives) + "🖤".repeat(MAX_LIVES - state.lives);
     customerCountEl.textContent = String(state.customers.length);
   }
 
-  function showToast(msg, type) {
+  function showToast(msg, type, duration) {
     toastEl.textContent = msg;
     toastEl.className = "toast " + (type || "");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
       toastEl.classList.add("hidden");
-    }, 1000);
+    }, duration || 1000);
   }
 
   function loseLife(reason) {
@@ -607,14 +646,11 @@
   }
 
   function findNextEmptyPlate() {
-    // 進行方向の「次」: progress が最も小さい空き皿（手前側）を優先
-    // 単純に最初の空きを探す（等間隔なので十分）
     let best = null;
     let bestProg = Infinity;
     for (const p of state.plates) {
       if (!p.sushi) {
-        // prefer plate closest to "serving" position (top = progress ~0)
-        const dist = p.progress; // 0 is top
+        const dist = p.progress;
         if (dist < bestProg) {
           bestProg = dist;
           best = p;
@@ -641,66 +677,99 @@
     resetCraft();
   }
 
-  function onPlatePointer(e) {
-    e.preventDefault();
-    if (!state || !state.running) return;
-    const el = e.currentTarget;
-    const plate = state.plates.find((p) => p.el === el);
-    if (!plate || plate.cooling) return;
+  function checkLevelUp() {
+    const target = 1 + Math.floor(state.servedTotal / SERVES_PER_LEVEL);
+    if (target <= state.level) return;
+    const oldLevel = state.level;
+    state.level = target;
 
-    // 空き皿はタップ無視
-    if (!plate.sushi) {
-      showToast("空っぽのお皿だよ", "");
-      return;
+    for (let lv = oldLevel + 1; lv <= Math.min(target, MAX_UNLOCK_LEVEL); lv++) {
+      const ids = LEVEL_UNLOCKS[lv];
+      if (!ids || !ids.length) continue;
+      const names = ids
+        .map((id) => {
+          const s = SUSHI.find((x) => x.id === id);
+          return s ? s.name : id;
+        })
+        .join("・");
+      showToast("新ネタ解放！" + names, "ok", 2000);
+    }
+    if (oldLevel < MAX_UNLOCK_LEVEL && target >= MAX_UNLOCK_LEVEL) {
+      // 最終ネタ解放済み
+    } else if (target > MAX_UNLOCK_LEVEL && oldLevel >= MAX_UNLOCK_LEVEL) {
+      showToast("レベル " + target + "！お客さんが急ぎ気味…", "ok", 1600);
     }
 
-    plate.cooling = true;
-    el.classList.add("tapped");
-
-    const matchIdx = state.customers.findIndex(
-      (c) => c.sushi.id === plate.sushi.id
-    );
-    if (matchIdx >= 0) {
-      const cust = state.customers[matchIdx];
-      const bonus = state.combo * POINTS_COMBO;
-      state.score += POINTS_CORRECT + bonus;
-      state.combo += 1;
-      state.servedTotal += 1;
-      el.classList.add("flash-ok");
-      showToast(
-        bonus > 0
-          ? "+" + (POINTS_CORRECT + bonus) + " コンボ！"
-          : "おいしい！ +" + POINTS_CORRECT,
-        "ok"
-      );
-      cust.el.classList.add("served");
-      const servedId = cust.id;
-      // お皿を空に
-      plate.sushi = null;
-      setTimeout(() => renderPlateContent(plate), 180);
-
-      setTimeout(() => {
-        if (!state || !state.running) return;
-        const i = state.customers.findIndex((c) => c.id === servedId);
-        if (i >= 0) state.customers.splice(i, 1);
-        if (state.customers.length < state.maxActive) {
-          state.customers.push(createCustomer(state.customers.length));
-        }
-        updateHud();
-        renderCustomers(true);
-      }, 280);
-    } else {
-      el.classList.add("flash-bad");
-      showToast("注文と違うよ！", "bad");
-      loseLife("まちがい！");
-    }
-
+    buildIngredientButtons();
     updateHud();
+  }
+
+  /** マッチする皿が座席付近に来たら自動配膳 */
+  function performAutoServe(plate, cust) {
+    if (!state || !state.running) return;
+    if (!plate.sushi || cust.serving) return;
+
+    cust.serving = true;
+    plate.cooling = true;
+
+    const bonus = state.combo * POINTS_COMBO;
+    state.score += POINTS_CORRECT + bonus;
+    state.combo += 1;
+    state.servedTotal += 1;
+
+    plate.el.classList.add("flash-ok");
+    showToast(
+      bonus > 0
+        ? "+" + (POINTS_CORRECT + bonus) + " コンボ！"
+        : "おいしい！ +" + POINTS_CORRECT,
+      "ok"
+    );
+
+    cust.el.classList.add("served");
+    const servedId = cust.id;
+    const sushiGone = plate.sushi;
+    plate.sushi = null;
+    setTimeout(() => {
+      renderPlateContent(plate);
+      plate.el.classList.remove("flash-ok");
+      plate.cooling = false;
+    }, 180);
 
     setTimeout(() => {
-      el.classList.remove("tapped", "flash-ok", "flash-bad");
-      plate.cooling = false;
-    }, 320);
+      if (!state || !state.running) return;
+      const i = state.customers.findIndex((c) => c.id === servedId);
+      if (i >= 0) state.customers.splice(i, 1);
+      reassignCustomerSeats();
+      if (state.customers.length < state.maxActive) {
+        state.customers.push(createCustomer(state.customers.length));
+      }
+      checkLevelUp();
+      updateHud();
+      renderCustomers(true);
+    }, 280);
+
+    void sushiGone;
+  }
+
+  function tryAutoServe() {
+    if (!state || !state.running) return;
+    for (const plate of state.plates) {
+      if (!plate.sushi || plate.cooling) continue;
+      let best = null;
+      let bestDist = Infinity;
+      for (const c of state.customers) {
+        if (c.serving) continue;
+        if (c.sushi.id !== plate.sushi.id) continue;
+        const d = progressDist(plate.progress, c.seatProgress);
+        if (d <= SERVE_WINDOW && d < bestDist) {
+          bestDist = d;
+          best = c;
+        }
+      }
+      if (best) {
+        performAutoServe(plate, best);
+      }
+    }
   }
 
   function tick(ts) {
@@ -712,15 +781,18 @@
     const speed =
       BASE_SPEED +
       Math.min(0.02, state.score / 12000) +
-      state.customers.length * 0.0012;
+      state.customers.length * 0.0012 +
+      Math.max(0, state.level - MAX_UNLOCK_LEVEL) * 0.0015;
 
     for (const plate of state.plates) {
       plate.progress = (plate.progress + (speed * dt) / 1000) % 1;
     }
     layoutPlates();
+    tryAutoServe();
 
     let timedOut = null;
     for (const c of state.customers) {
+      if (c.serving) continue;
       c.patience -= dt;
       if (c.patience <= 0 && !timedOut) timedOut = c;
     }
@@ -728,6 +800,7 @@
       const idx = state.customers.indexOf(timedOut);
       if (idx >= 0) {
         state.customers.splice(idx, 1);
+        reassignCustomerSeats();
         loseLife(timedOut.name + "さんが帰っちゃった…");
         if (state.running && state.customers.length < state.maxActive) {
           state.customers.push(createCustomer(state.customers.length));
@@ -759,6 +832,7 @@
     state = {
       running: true,
       score: 0,
+      level: 1,
       lives: MAX_LIVES,
       combo: 0,
       servedTotal: 0,
@@ -781,6 +855,7 @@
     }
 
     state.customers.push(createCustomer(0));
+    buildIngredientButtons();
     resetCraft();
     updateHud();
     renderCustomers(true);
@@ -813,7 +888,6 @@
   btnPlace.addEventListener(
     "pointerdown",
     (e) => {
-      // タッチでクリック遅延を避ける
       if (e.pointerType === "touch") {
         e.preventDefault();
         placeCraftOnBelt();

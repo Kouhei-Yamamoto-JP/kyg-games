@@ -181,9 +181,10 @@ body {
 
 .hud-item {
   flex: 1;
+  min-width: 0;
   background: rgba(255, 248, 240, 0.95);
   border-radius: 12px;
-  padding: 6px 8px;
+  padding: 6px 4px;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
@@ -447,9 +448,8 @@ body {
   align-items: center;
   justify-content: center;
   cursor: default;
-  pointer-events: auto;
-  transition: transform 0.08s ease;
-  touch-action: manipulation;
+  pointer-events: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
   will-change: left, top;
   padding: 0;
   border: none;
@@ -458,17 +458,11 @@ body {
 }
 
 .plate.empty {
-  cursor: default;
   opacity: 0.92;
 }
 
 .plate.filled {
-  cursor: pointer;
-}
-
-.plate:active.filled,
-.plate.tapped {
-  transform: scale(1.12);
+  /* visual only — auto-serve, no tap */
 }
 
 .plate.flash-ok {

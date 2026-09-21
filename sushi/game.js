@@ -181,6 +181,7 @@
 
 
   const ICON_BASE = "assets/icons/";
+  const ICON_VER = "20260921f";
   const ING_ICON_FILE = {
     shari: "shari.png",
     nori: "nori.png",
@@ -215,6 +216,8 @@
       '" src="' +
       ICON_BASE +
       file +
+      "?v=" +
+      ICON_VER +
       '" alt="' +
       (alt || "") +
       '" width="' +

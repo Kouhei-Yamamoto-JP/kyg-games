@@ -100,21 +100,69 @@
   const SERVE_BONUS_MS = 10000;
   const RANK_NAME_MAX = 12;
 
-  // —— ランキング API（localStorage。後で ConoHa 等へ差し替えやすいよう集約） ——
+  // —— ランキング API（リモート ConoHa + localStorage フォールバック） ——
   const RankingAPI = {
     STORAGE_KEY: "kyg-sushi-ranking-v1",
+    REMOTE_URL: "https://api.kyg-style.com/sushi/rank",
     MAX_ENTRIES: 20,
 
-    /** @returns {Promise<Array>} */
-    async fetchRanking() {
+    normalizeEntry(entry) {
+      return {
+        name: String(entry.name || "ななし").slice(0, RANK_NAME_MAX),
+        score: Number(entry.score) || 0,
+        level: Number(entry.level) || 1,
+        served: Number(entry.served) || 0,
+        date: entry.date || new Date().toISOString(),
+        durationSec: Number(entry.durationSec) || 0,
+      };
+    },
+
+    readLocal() {
       try {
         const raw = localStorage.getItem(this.STORAGE_KEY);
         if (!raw) return [];
         const list = JSON.parse(raw);
         return Array.isArray(list) ? list : [];
       } catch (e) {
-        console.warn("RankingAPI.fetchRanking failed", e);
+        console.warn("RankingAPI.readLocal failed", e);
         return [];
+      }
+    },
+
+    writeLocal(list) {
+      try {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(list));
+      } catch (e) {
+        console.warn("RankingAPI.writeLocal failed", e);
+      }
+    },
+
+    mergeLocal(entry) {
+      const list = this.readLocal();
+      list.push(this.normalizeEntry(entry));
+      list.sort((a, b) => b.score - a.score || a.durationSec - b.durationSec);
+      const top = list.slice(0, this.MAX_ENTRIES);
+      this.writeLocal(top);
+      return top;
+    },
+
+    /** @returns {Promise<Array>} */
+    async fetchRanking() {
+      try {
+        const res = await fetch(this.REMOTE_URL, {
+          method: "GET",
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        if (data && data.ok && Array.isArray(data.entries)) {
+          return data.entries.map((e) => this.normalizeEntry(e));
+        }
+        throw new Error((data && data.error) || "bad response");
+      } catch (e) {
+        console.warn("RankingAPI.fetchRanking remote failed, using localStorage", e);
+        return this.readLocal();
       }
     },
 
@@ -123,24 +171,28 @@
      * @returns {Promise<Array>} 保存後のトップ一覧
      */
     async saveScore(entry) {
-      const list = await this.fetchRanking();
-      const cleaned = {
-        name: String(entry.name || "ななし").slice(0, RANK_NAME_MAX),
-        score: Number(entry.score) || 0,
-        level: Number(entry.level) || 1,
-        served: Number(entry.served) || 0,
-        date: entry.date || new Date().toISOString(),
-        durationSec: Number(entry.durationSec) || 0,
-      };
-      list.push(cleaned);
-      list.sort((a, b) => b.score - a.score || a.durationSec - b.durationSec);
-      const top = list.slice(0, this.MAX_ENTRIES);
+      const cleaned = this.normalizeEntry(entry);
       try {
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(top));
+        const res = await fetch(this.REMOTE_URL, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(cleaned),
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        if (data && data.ok && Array.isArray(data.entries)) {
+          // 成功時もローカルにミラー（オフライン閲覧用）
+          this.writeLocal(data.entries.map((e) => this.normalizeEntry(e)));
+          return data.entries.map((e) => this.normalizeEntry(e));
+        }
+        throw new Error((data && data.error) || "bad response");
       } catch (e) {
-        console.warn("RankingAPI.saveScore failed", e);
+        console.warn("RankingAPI.saveScore remote failed, using localStorage", e);
+        return this.mergeLocal(cleaned);
       }
-      return top;
     },
   };
 

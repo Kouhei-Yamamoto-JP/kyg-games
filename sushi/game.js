@@ -1,5 +1,5 @@
 /**
- * 回転寿司ゲーム — クラフト→レーン→自動配膳 / レベルでネタ解放
+ * 回転寿司ゲーム — クラフト→レーン自動配膳 / 制限時間 / レベルでネタ解放
  */
 (function () {
   "use strict";
@@ -19,9 +19,14 @@
     salmon: { id: "salmon", name: "サーモン", emoji: "🐟", kind: "neta" },
     ebi: { id: "ebi", name: "えび", emoji: "🦐", kind: "neta" },
     tamago: { id: "tamago", name: "たまご", emoji: "🥚", kind: "neta" },
+    hamachi: { id: "hamachi", name: "はまち", emoji: "🐠", kind: "neta" },
+    hotate: { id: "hotate", name: "ほたて", emoji: "🐚", kind: "neta" },
     ikura: { id: "ikura", name: "いくら", emoji: "🟠", kind: "neta" },
     uni: { id: "uni", name: "うに", emoji: "🟡", kind: "neta" },
+    corn: { id: "corn", name: "コーン", emoji: "🌽", kind: "neta" },
+    negitoro: { id: "negitoro", name: "ねぎとろ", emoji: "🧅", kind: "neta" },
     cucumber: { id: "cucumber", name: "きゅうり", emoji: "🥒", kind: "neta" },
+    natto: { id: "natto", name: "納豆", emoji: "🫘", kind: "neta" },
   };
 
   // —— 完成寿司 ——
@@ -30,17 +35,22 @@
     { id: "salmon", name: "サーモン", emoji: "🐟", type: "nigiri", neta: "salmon", weight: 3 },
     { id: "ebi", name: "えび", emoji: "🦐", type: "nigiri", neta: "ebi", weight: 2 },
     { id: "tamago", name: "たまご", emoji: "🥚", type: "nigiri", neta: "tamago", weight: 2 },
+    { id: "hamachi", name: "はまち", emoji: "🐠", type: "nigiri", neta: "hamachi", weight: 2 },
+    { id: "hotate", name: "ほたて", emoji: "🐚", type: "nigiri", neta: "hotate", weight: 2 },
     { id: "ikura", name: "いくら", emoji: "🟠", type: "gunkan", neta: "ikura", weight: 2 },
     { id: "uni", name: "うに", emoji: "🟡", type: "gunkan", neta: "uni", weight: 2 },
+    { id: "corn", name: "コーン軍艦", emoji: "🌽", type: "gunkan", neta: "corn", weight: 2 },
+    { id: "negitoro", name: "ねぎとろ軍艦", emoji: "🧅", type: "gunkan", neta: "negitoro", weight: 2 },
     { id: "kappa", name: "かっぱ巻", emoji: "🥒", type: "maki", neta: "cucumber", weight: 2 },
     { id: "tekka", name: "鉄火巻", emoji: "🍱", type: "maki", neta: "maguro", weight: 2 },
+    { id: "natto", name: "納豆巻", emoji: "🫘", type: "maki", neta: "natto", weight: 2 },
   ];
 
   // タイプ別に使えるネタ（全体）
   const NETA_BY_TYPE = {
-    nigiri: ["maguro", "salmon", "ebi", "tamago"],
-    gunkan: ["ikura", "uni"],
-    maki: ["cucumber", "maguro"],
+    nigiri: ["maguro", "salmon", "ebi", "tamago", "hamachi", "hotate"],
+    gunkan: ["ikura", "uni", "corn", "negitoro"],
+    maki: ["cucumber", "maguro", "natto"],
   };
 
   // レベルで解放される寿司 ID（累積）
@@ -49,15 +59,17 @@
     2: ["ebi", "tamago"],
     3: ["ikura", "uni"],
     4: ["kappa", "tekka"],
+    5: ["hamachi", "hotate"],
+    6: ["corn", "negitoro"],
+    7: ["natto"],
   };
-  const MAX_UNLOCK_LEVEL = 4;
+  const MAX_UNLOCK_LEVEL = 7;
   const SERVES_PER_LEVEL = 6;
 
   // お客さんのベルト座席（楕円 progress 0..1、上弧付近）
-  // progress 0 = 上端、時計回り
   const CUSTOMER_SEATS = [0.86, 0.93, 0.0, 0.07, 0.14];
-  const SERVE_WINDOW = 0.085; // 座席に近づいたら早めに自動配膳
-  const FRONT_PROGRESS = 0.5; // 手前（クラフトパネル側）
+  const SERVE_WINDOW = 0.085;
+  const FRONT_PROGRESS = 0.5;
 
   const FACES = ["🙂", "😊", "🤓", "😎", "🤗", "😋", "🧒", "👩", "👨", "🧓"];
   const NAMES = [
@@ -73,16 +85,64 @@
     "ひなた",
   ];
 
-  // —— 難易度（やさしめ） ——
+  // —— 難易度 ——
   const MAX_LIVES = 5;
-  const BASE_PATIENCE = 36000;
-  const MIN_PATIENCE = 22000;
+  const BASE_PATIENCE = 30000;
+  const MIN_PATIENCE = 10000;
   const PLATE_COUNT = 20;
   const BASE_SPEED = 0.048;
   const SPAWN_CUSTOMER_EVERY = 24000;
   const MAX_CUSTOMERS = 5;
   const POINTS_CORRECT = 100;
   const POINTS_COMBO = 25;
+  const START_TIME_MS = 60000;
+  const MAX_SESSION_MS = 600000;
+  const SERVE_BONUS_MS = 10000;
+  const RANK_NAME_MAX = 12;
+
+  // —— ランキング API（localStorage。後で ConoHa 等へ差し替えやすいよう集約） ——
+  const RankingAPI = {
+    STORAGE_KEY: "kyg-sushi-ranking-v1",
+    MAX_ENTRIES: 20,
+
+    /** @returns {Promise<Array>} */
+    async fetchRanking() {
+      try {
+        const raw = localStorage.getItem(this.STORAGE_KEY);
+        if (!raw) return [];
+        const list = JSON.parse(raw);
+        return Array.isArray(list) ? list : [];
+      } catch (e) {
+        console.warn("RankingAPI.fetchRanking failed", e);
+        return [];
+      }
+    },
+
+    /**
+     * @param {{name:string,score:number,level:number,served:number,date:string,durationSec:number}} entry
+     * @returns {Promise<Array>} 保存後のトップ一覧
+     */
+    async saveScore(entry) {
+      const list = await this.fetchRanking();
+      const cleaned = {
+        name: String(entry.name || "ななし").slice(0, RANK_NAME_MAX),
+        score: Number(entry.score) || 0,
+        level: Number(entry.level) || 1,
+        served: Number(entry.served) || 0,
+        date: entry.date || new Date().toISOString(),
+        durationSec: Number(entry.durationSec) || 0,
+      };
+      list.push(cleaned);
+      list.sort((a, b) => b.score - a.score || a.durationSec - b.durationSec);
+      const top = list.slice(0, this.MAX_ENTRIES);
+      try {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(top));
+      } catch (e) {
+        console.warn("RankingAPI.saveScore failed", e);
+      }
+      return top;
+    },
+  };
 
   // —— DOM ——
   const $ = (sel) => document.querySelector(sel);
@@ -92,8 +152,13 @@
   const btnStart = $("#btn-start");
   const btnRetry = $("#btn-retry");
   const btnPlace = $("#btn-place");
+  const btnRankingStart = $("#btn-ranking-start");
+  const btnRankingClose = $("#btn-ranking-close");
+  const startRankingPanel = $("#start-ranking-panel");
+  const startRankingList = $("#start-ranking-list");
   const scoreEl = $("#score");
   const levelEl = $("#level");
+  const timeLeftEl = $("#time-left");
   const livesEl = $("#lives");
   const customerCountEl = $("#customer-count");
   const customersEl = $("#customers");
@@ -103,16 +168,24 @@
   const pauseOverlay = $("#pause-overlay");
   const finalScoreEl = $("#final-score");
   const finalHintEl = $("#final-hint");
+  const finalMetaEl = $("#final-meta");
+  const gameoverTitleEl = $("#gameover-title");
   const craftPanel = $("#craft-panel");
   const craftProgress = $("#craft-progress");
   const craftPreview = $("#craft-preview");
   const craftIngredients = $("#craft-ingredients");
+  const rankingForm = $("#ranking-form");
+  const rankNameInput = $("#rank-name");
+  const btnRankSubmit = $("#btn-rank-submit");
+  const btnRankSkip = $("#btn-rank-skip");
+  const gameoverRankingList = $("#gameover-ranking-list");
 
   // —— 状態 ——
   let state = null;
   let rafId = null;
   let lastTs = 0;
   let toastTimer = null;
+  let noPlateToastAt = 0;
 
   function weightedPick(list) {
     const total = list.reduce((s, x) => s + (x.weight || 1), 0);
@@ -148,7 +221,7 @@
 
   function getUnlockedIngredientIds(level) {
     const ids = new Set(["shari"]);
-    if (level >= 3) ids.add("nori"); // 軍艦・巻物
+    if (level >= 3) ids.add("nori");
     for (const s of getUnlockedSushi(level)) {
       ids.add(s.neta);
     }
@@ -178,10 +251,8 @@
     return (TYPES[typeId] && TYPES[typeId].label) || typeId;
   }
 
-
-
   const ICON_BASE = "assets/icons/";
-  const ICON_VER = "20260921f";
+  const ICON_VER = "20260921g";
   const ING_ICON_FILE = {
     shari: "shari.png",
     nori: "nori.png",
@@ -204,7 +275,6 @@
     tekka: "maki-tekka.png",
   };
 
-  // Pixel sizes close to the original CSS/emoji icons
   const ART_PX = { sm: 18, md: 20, lg: 22, plate: 18, order: 20, ing: 20, preview: 20 };
   function artImg(file, alt, size) {
     const key = size || "md";
@@ -232,7 +302,6 @@
     );
   }
 
-  /** CSS sushi / ingredient icon HTML (PNG art preferred) */
   function wrapIcon(classes, inner, size) {
     const sz = size ? " size-" + size : "";
     return (
@@ -241,6 +310,18 @@
       sz +
       '" aria-hidden="true">' +
       inner +
+      "</span>"
+    );
+  }
+
+  function emojiFallback(emoji, size) {
+    const key = size || "md";
+    const px = ART_PX[key] || ART_PX.md;
+    return (
+      '<span class="sushi-emoji-fallback" style="font-size:' +
+      px +
+      'px;line-height:1;display:block;text-align:center;" aria-hidden="true">' +
+      (emoji || "🍣") +
       "</span>"
     );
   }
@@ -256,7 +337,17 @@
     if (ingId === "nori") {
       return wrapIcon("ing nori", '<span class="si-sheet"></span>', sz);
     }
-    return wrapIcon("ing " + ingId, '<span class="si-topping"></span>', sz);
+    // 画像なしネタ: CSS トッピング色 + 絵文字フォールバック併用
+    if (ing && ["hamachi", "hotate", "corn", "negitoro", "natto"].indexOf(ingId) >= 0) {
+      return (
+        wrapIcon("ing " + ingId, '<span class="si-topping"></span>', sz) ||
+        emojiFallback(ing.emoji, sz)
+      );
+    }
+    if (ing) {
+      return wrapIcon("ing " + ingId, '<span class="si-topping"></span>', sz);
+    }
+    return emojiFallback("❓", sz);
   }
 
   function finishedSushiIconHTML(sushi, size) {
@@ -287,7 +378,7 @@
         sz
       );
     }
-    return wrapIcon("empty-dish", "", sz);
+    return emojiFallback(sushi.emoji, sz);
   }
 
   function previewIconHTML(steps, analysis) {
@@ -305,7 +396,6 @@
     return Math.min(d, 1 - d);
   }
 
-  /** 楕円軌道上の点 (progress 0..1) */
   function pointOnBelt(t, w, h) {
     const cx = w / 2;
     const cy = h / 2;
@@ -318,7 +408,6 @@
     };
   }
 
-  // —— クラフト推論（解放済みのみ） ——
   function analyzeCraft(steps) {
     const level = state ? state.level : 1;
     const unlockedTypes = getUnlockedTypes(level);
@@ -337,7 +426,6 @@
 
     const first = steps[0];
 
-    // 海苔スタート → 巻物のみ
     if (first === "nori") {
       if (!unlockedTypes.includes("maki")) {
         return { candidates: [], nextKinds: [], nextNetas: null, done: null, invalid: true };
@@ -377,7 +465,6 @@
       };
     }
 
-    // シャリスタート → にぎり or 軍艦
     if (first === "shari") {
       if (steps.length === 1) {
         const cands = ["nigiri"];
@@ -455,7 +542,10 @@
   function formatProgress(steps, analysis) {
     if (analysis.done) {
       const t = typeLabel(analysis.done.type);
-      return t + "完成！ 「レーンに出す」で出そう → " + analysis.done.name;
+      if (state && state.awaitingPlate) {
+        return t + "完成！ 空き皿を待っています… → " + analysis.done.name;
+      }
+      return t + "完成！ 自動でレーンに出します → " + analysis.done.name;
     }
     if (steps.length === 0) {
       const types = getUnlockedTypes(state ? state.level : 1);
@@ -491,6 +581,7 @@
     if (!state) return;
     state.craftSteps = [];
     state.craftDone = null;
+    state.awaitingPlate = false;
     updateCraftUI();
   }
 
@@ -507,7 +598,7 @@
     state.craftDone = analysis.done;
     craftProgress.textContent = formatProgress(state.craftSteps, analysis);
     craftPreview.innerHTML = previewIconHTML(state.craftSteps, analysis);
-    btnPlace.disabled = !analysis.done;
+    if (btnPlace) btnPlace.disabled = !analysis.done;
     craftPreview.classList.toggle("ready", !!analysis.done);
     craftPanel.classList.toggle("ready", !!analysis.done);
 
@@ -522,6 +613,11 @@
 
   function onIngredientTap(ingId) {
     if (!state || !state.running) return;
+    if (state.craftDone) {
+      // 完成済みで空き皿待ち中は材料入力をブロック
+      showToast("空き皿がないよ", "bad");
+      return;
+    }
     const analysis = analyzeCraft(state.craftSteps);
     if (!isIngredientAllowed(ingId, analysis)) {
       shakeCraft();
@@ -540,6 +636,7 @@
     updateCraftUI();
     if (next.done) {
       showToast(next.done.name + " できた！", "ok");
+      placeCraftOnBelt({ fromAuto: true });
     }
   }
 
@@ -554,9 +651,14 @@
       "salmon",
       "ebi",
       "tamago",
+      "hamachi",
+      "hotate",
       "ikura",
       "uni",
+      "corn",
+      "negitoro",
       "cucumber",
+      "natto",
     ];
     for (const id of order) {
       if (!unlocked.has(id)) continue;
@@ -584,7 +686,6 @@
     if (state) updateCraftUI();
   }
 
-  // —— お皿（タップ不要・見た目のみ） ——
   function renderPlateContent(plate) {
     const el = plate.el;
     el.innerHTML = "";
@@ -642,8 +743,8 @@
     const sushi = pickSushi();
     const face = FACES[Math.floor(Math.random() * FACES.length)];
     const name = NAMES[Math.floor(Math.random() * NAMES.length)];
-    const scorePenalty = Math.min(8000, Math.floor(state.score / 250) * 400);
-    const levelPenalty = Math.max(0, state.level - MAX_UNLOCK_LEVEL) * 900;
+    const scorePenalty = Math.min(12000, Math.floor(state.score / 250) * 500);
+    const levelPenalty = Math.max(0, state.level - 1) * 800;
     const scaled = BASE_PATIENCE - scorePenalty - levelPenalty;
     const maxP = Math.max(MIN_PATIENCE, scaled);
 
@@ -698,9 +799,19 @@
     gameoverScreen.classList.toggle("hidden", which !== "gameover");
   }
 
+  function formatTimeLeft(ms) {
+    const sec = Math.max(0, Math.ceil(ms / 1000));
+    return sec + "秒";
+  }
+
   function updateHud() {
+    if (!state) return;
     scoreEl.textContent = String(state.score);
     if (levelEl) levelEl.textContent = String(state.level);
+    if (timeLeftEl) {
+      timeLeftEl.textContent = formatTimeLeft(state.timeLeft);
+      timeLeftEl.classList.toggle("urgent", state.timeLeft <= 10000);
+    }
     livesEl.textContent =
       "❤️".repeat(state.lives) + "🖤".repeat(MAX_LIVES - state.lives);
     customerCountEl.textContent = String(state.customers.length);
@@ -730,21 +841,123 @@
     updateHud();
     showToast(reason || "ライフ減少…", "bad");
     if (state.lives <= 0) {
-      endGame();
+      endGame("lives");
     }
   }
 
-  function endGame() {
+  function renderRankingList(olEl, list, highlightScore) {
+    if (!olEl) return;
+    olEl.innerHTML = "";
+    if (!list || !list.length) {
+      const li = document.createElement("li");
+      li.className = "ranking-empty";
+      li.textContent = "まだ記録がありません";
+      olEl.appendChild(li);
+      return;
+    }
+    list.forEach((row, i) => {
+      const li = document.createElement("li");
+      if (highlightScore != null && row.score === highlightScore && i === list.findIndex((r) => r.score === highlightScore)) {
+        li.classList.add("highlight");
+      }
+      const d = row.date ? String(row.date).slice(0, 10) : "";
+      li.innerHTML =
+        '<span class="rank-pos">' +
+        (i + 1) +
+        '</span><span class="rank-name">' +
+        escapeHtml(row.name || "ななし") +
+        '</span><span class="rank-score">' +
+        row.score +
+        '</span><span class="rank-meta">Lv' +
+        (row.level || 1) +
+        " / " +
+        (row.served || 0) +
+        "皿" +
+        (d ? " / " + d : "") +
+        "</span>";
+      olEl.appendChild(li);
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  async function refreshRankingViews(highlightScore) {
+    const list = await RankingAPI.fetchRanking();
+    renderRankingList(startRankingList, list);
+    renderRankingList(gameoverRankingList, list, highlightScore);
+  }
+
+  function setRankingFormVisible(on) {
+    if (!rankingForm) return;
+    rankingForm.classList.toggle("hidden", !on);
+    if (on && rankNameInput) {
+      rankNameInput.value = "";
+      rankNameInput.focus();
+    }
+  }
+
+  async function endGame(reason) {
+    if (!state || !state.running) return;
     state.running = false;
+    state.endReason = reason || "lives";
+    state.durationSec = Math.floor(state.elapsed / 1000);
     if (rafId) cancelAnimationFrame(rafId);
     rafId = null;
+
     finalScoreEl.textContent = String(state.score);
-    if (state.score >= 2000) finalHintEl.textContent = "すごい！寿司職人級！";
-    else if (state.score >= 800) finalHintEl.textContent = "なかなかの腕前！";
-    else if (state.score >= 300)
-      finalHintEl.textContent = "もう少し！次はもっと届けよう";
-    else finalHintEl.textContent = "レシピを覚えて挑戦しよう";
+    if (finalMetaEl) {
+      finalMetaEl.textContent =
+        "レベル " +
+        state.level +
+        " ／ 提供 " +
+        state.servedTotal +
+        "皿 ／ " +
+        state.durationSec +
+        "秒";
+    }
+
+    if (state.endReason === "time") {
+      if (gameoverTitleEl) gameoverTitleEl.textContent = "クリア！";
+      if (state.score >= 2000) finalHintEl.textContent = "時間いっぱい！寿司職人級！";
+      else if (state.score >= 800) finalHintEl.textContent = "時間終了！なかなかの腕前！";
+      else finalHintEl.textContent = "制限時間終了！もう一度挑戦しよう";
+    } else {
+      if (gameoverTitleEl) gameoverTitleEl.textContent = "ゲームオーバー";
+      if (state.score >= 2000) finalHintEl.textContent = "すごい！寿司職人級！";
+      else if (state.score >= 800) finalHintEl.textContent = "なかなかの腕前！";
+      else if (state.score >= 300) finalHintEl.textContent = "もう少し！次はもっと届けよう";
+      else finalHintEl.textContent = "レシピを覚えて挑戦しよう";
+    }
+
+    setRankingFormVisible(true);
+    await refreshRankingViews();
     showScreen("gameover");
+  }
+
+  async function submitRanking() {
+    if (!state) return;
+    const name = (rankNameInput && rankNameInput.value ? rankNameInput.value : "").trim();
+    await RankingAPI.saveScore({
+      name: name || "ななし",
+      score: state.score,
+      level: state.level,
+      served: state.servedTotal,
+      date: new Date().toISOString(),
+      durationSec: state.durationSec || Math.floor(state.elapsed / 1000),
+    });
+    setRankingFormVisible(false);
+    await refreshRankingViews(state.score);
+    showToast("ランキングに登録したよ", "ok");
+  }
+
+  function skipRanking() {
+    setRankingFormVisible(false);
   }
 
   function layoutPlates() {
@@ -774,7 +987,6 @@
     }
   }
 
-  // 手前の空き皿に出す
   function findNextEmptyPlate() {
     let best = null;
     let bestDist = Infinity;
@@ -790,21 +1002,37 @@
     return best;
   }
 
-  function placeCraftOnBelt() {
-    if (!state || !state.running) return;
+  function placeCraftOnBelt(opts) {
+    opts = opts || {};
+    if (!state || !state.running) return false;
     if (!state.craftDone) {
-      showToast("まだ完成していないよ", "bad");
-      return;
+      if (!opts.silent) showToast("まだ完成していないよ", "bad");
+      return false;
     }
     const empty = findNextEmptyPlate();
     if (!empty) {
-      showToast("空き皿がないよ", "bad");
-      return;
+      state.awaitingPlate = true;
+      updateCraftUI();
+      const now = performance.now();
+      if (!opts.silent && now - noPlateToastAt > 1500) {
+        noPlateToastAt = now;
+        showToast("空き皿がないよ", "bad");
+      }
+      return false;
     }
     empty.sushi = state.craftDone;
     renderPlateContent(empty);
-    showToast(state.craftDone.name + " をレーンに出した！", "ok");
+    if (!opts.silent) {
+      showToast(state.craftDone.name + " をレーンに出した！", "ok");
+    }
     resetCraft();
+    return true;
+  }
+
+  function tryPendingPlace() {
+    if (!state || !state.running) return;
+    if (!state.craftDone || !state.awaitingPlate) return;
+    placeCraftOnBelt({ silent: true });
   }
 
   function checkLevelUp() {
@@ -823,9 +1051,7 @@
       });
       showToastHtml("新ネタ解放！ " + bits.join("　"), "ok", 2000);
     }
-    if (oldLevel < MAX_UNLOCK_LEVEL && target >= MAX_UNLOCK_LEVEL) {
-      // 最終ネタ解放済み
-    } else if (target > MAX_UNLOCK_LEVEL && oldLevel >= MAX_UNLOCK_LEVEL) {
+    if (target > MAX_UNLOCK_LEVEL && oldLevel >= MAX_UNLOCK_LEVEL) {
       showToast("レベル " + target + "！お客さんが急ぎ気味…", "ok", 1600);
     }
 
@@ -833,7 +1059,11 @@
     updateHud();
   }
 
-  /** マッチする皿が座席付近に来たら自動配膳 */
+  function addServeTimeBonus() {
+    const cap = Math.max(0, MAX_SESSION_MS - state.elapsed);
+    state.timeLeft = Math.min(state.timeLeft + SERVE_BONUS_MS, cap);
+  }
+
   function performAutoServe(plate, cust) {
     if (!state || !state.running) return;
     if (!plate.sushi || cust.serving) return;
@@ -845,12 +1075,13 @@
     state.score += POINTS_CORRECT + bonus;
     state.combo += 1;
     state.servedTotal += 1;
+    addServeTimeBonus();
 
     plate.el.classList.add("flash-ok");
     showToast(
       bonus > 0
-        ? "+" + (POINTS_CORRECT + bonus) + " コンボ！"
-        : "おいしい！ +" + POINTS_CORRECT,
+        ? "+" + (POINTS_CORRECT + bonus) + " コンボ！ +10秒"
+        : "おいしい！ +" + POINTS_CORRECT + " +10秒",
       "ok"
     );
 
@@ -875,6 +1106,7 @@
       checkLevelUp();
       updateHud();
       renderCustomers(true);
+      tryPendingPlace();
     }, 280);
 
     void sushiGone;
@@ -923,6 +1155,7 @@
     }
     layoutPlates();
     tryAutoServe();
+    tryPendingPlace();
 
     let timedOut = null;
     for (const c of state.customers) {
@@ -944,6 +1177,18 @@
     renderCustomers();
 
     state.elapsed += dt;
+    state.timeLeft -= dt;
+    // 残り時間が「総経過600秒」を超えないようキャップ
+    const maxLeft = Math.max(0, MAX_SESSION_MS - state.elapsed);
+    if (state.timeLeft > maxLeft) state.timeLeft = maxLeft;
+
+    if (state.timeLeft <= 0) {
+      state.timeLeft = 0;
+      updateHud();
+      endGame("time");
+      return;
+    }
+
     if (
       state.maxActive < MAX_CUSTOMERS &&
       state.elapsed - state.lastUnlockAt > SPAWN_CUSTOMER_EVERY
@@ -953,10 +1198,10 @@
       if (state.customers.length < state.maxActive) {
         state.customers.push(createCustomer(state.customers.length));
         showToast("お客さんが増えた！", "ok");
-        updateHud();
       }
     }
 
+    updateHud();
     rafId = requestAnimationFrame(tick);
   }
 
@@ -972,12 +1217,16 @@
       combo: 0,
       servedTotal: 0,
       elapsed: 0,
+      timeLeft: START_TIME_MS,
       lastUnlockAt: 0,
       maxActive: 1,
       customers: [],
       plates: [],
       craftSteps: [],
       craftDone: null,
+      awaitingPlate: false,
+      endReason: null,
+      durationSec: 0,
     };
 
     platesEl.innerHTML = "";
@@ -998,6 +1247,7 @@
       pauseOverlay.classList.add("hidden");
       pauseOverlay.setAttribute("aria-hidden", "true");
     }
+    if (startRankingPanel) startRankingPanel.classList.add("hidden");
     showScreen("game");
 
     requestAnimationFrame(() => {
@@ -1023,18 +1273,34 @@
 
   btnStart.addEventListener("click", startGame);
   btnRetry.addEventListener("click", startGame);
-  btnPlace.addEventListener("click", placeCraftOnBelt);
-  btnPlace.addEventListener(
-    "pointerdown",
-    (e) => {
-      if (e.pointerType === "touch") {
-        e.preventDefault();
-        placeCraftOnBelt();
-      }
-    },
-    { passive: false }
-  );
 
+  if (btnRankingStart) {
+    btnRankingStart.addEventListener("click", async () => {
+      await refreshRankingViews();
+      if (startRankingPanel) startRankingPanel.classList.toggle("hidden");
+    });
+  }
+  if (btnRankingClose) {
+    btnRankingClose.addEventListener("click", () => {
+      if (startRankingPanel) startRankingPanel.classList.add("hidden");
+    });
+  }
+  if (btnRankSubmit) {
+    btnRankSubmit.addEventListener("click", () => {
+      submitRanking();
+    });
+  }
+  if (btnRankSkip) {
+    btnRankSkip.addEventListener("click", skipRanking);
+  }
+  if (rankNameInput) {
+    rankNameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submitRanking();
+      }
+    });
+  }
 
   function setPaused(on) {
     if (!state || !state.running) return;
@@ -1072,5 +1338,6 @@
   });
 
   buildIngredientButtons();
+  refreshRankingViews();
   showScreen("start");
 })();

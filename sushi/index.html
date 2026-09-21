@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>回転寿司ゲーム</title>
-  <link rel="stylesheet" href="style.css?v=20260921f" />
+  <link rel="stylesheet" href="style.css?v=20260921g" />
 </head>
 <body>
   <div id="app">
@@ -13,14 +13,21 @@
     <section id="start-screen" class="screen">
       <div class="panel">
         <h1 class="title">🍣 回転寿司</h1>
-        <p class="subtitle">材料で寿司を作ってレーンに出すと、注文のお客さんが自動で取ってくれるよ！</p>
+        <p class="subtitle">材料で寿司を作ると、完成後に自動でレーンへ。注文のお客さんが自動で取ってくれるよ！</p>
         <ul class="howto">
           <li>材料で寿司を作る（レベルでネタが増える）</li>
-          <li>「レーンに出す」で空き皿に乗せる</li>
+          <li>完成すると自動でレーンに乗る（空き皿がなければ待つ）</li>
           <li>注文と合う皿がお客さんの前を通ると自動で配膳</li>
-          <li>時間切れでライフ減少（❤️×5）／レベルアップで新ネタ解放</li>
+          <li>制限時間60秒・提供成功で+10秒（最大600秒）</li>
+          <li>待ち時間切れでライフ減少（❤️×5）／レベルアップで新ネタ解放</li>
         </ul>
         <button id="btn-start" class="btn primary" type="button">スタート</button>
+        <button id="btn-ranking-start" class="btn secondary" type="button">ランキング</button>
+        <div id="start-ranking-panel" class="ranking-panel hidden" aria-label="この端末のランキング">
+          <h3 class="ranking-title">この端末のランキング</h3>
+          <ol id="start-ranking-list" class="ranking-list"></ol>
+          <button id="btn-ranking-close" class="btn secondary small" type="button">閉じる</button>
+        </div>
         <a class="back-link" href="../">← ゲーム一覧へ</a>
         <p class="key-hint">ESC: 一覧へ　／　スペース: 一時停止</p>
       </div>
@@ -37,6 +44,10 @@
         <div class="hud-item">
           <span class="hud-label">レベル</span>
           <span id="level" class="hud-value">1</span>
+        </div>
+        <div class="hud-item hud-time">
+          <span class="hud-label">残り時間</span>
+          <span id="time-left" class="hud-value">60秒</span>
         </div>
         <div class="hud-item">
           <span class="hud-label">ライフ</span>
@@ -62,7 +73,7 @@
         <div id="craft-preview" class="craft-preview" aria-hidden="true"><span class="sushi-icon empty-dish size-lg" aria-hidden="true"></span></div>
         <div id="craft-progress" class="craft-progress">材料を選んでね</div>
         <div id="craft-ingredients" class="craft-ingredients" role="group" aria-label="材料"></div>
-        <button id="btn-place" class="btn place" type="button" disabled>レーンに出す</button>
+        <button id="btn-place" class="btn place hidden" type="button" disabled aria-hidden="true" tabindex="-1">レーンに出す</button>
       </div>
 
       <div id="toast" class="toast hidden" aria-live="polite"></div>
@@ -77,15 +88,31 @@
 
     <!-- Game over screen -->
     <section id="gameover-screen" class="screen hidden">
-      <div class="panel">
-        <h2 class="title">ゲームオーバー</h2>
+      <div class="panel gameover-panel">
+        <h2 class="title" id="gameover-title">ゲームオーバー</h2>
         <p class="final-score">スコア: <strong id="final-score">0</strong></p>
+        <p class="final-meta" id="final-meta"></p>
         <p class="final-hint" id="final-hint"></p>
+
+        <div id="ranking-form" class="ranking-form">
+          <p class="ranking-form-label">ランキングに登録（任意）</p>
+          <div class="ranking-form-row">
+            <input id="rank-name" type="text" maxlength="12" placeholder="なまえ（12文字まで）" autocomplete="off" />
+            <button id="btn-rank-submit" class="btn primary small" type="button">登録</button>
+          </div>
+          <button id="btn-rank-skip" class="btn secondary small" type="button">スキップ</button>
+        </div>
+
+        <div id="gameover-ranking" class="ranking-panel">
+          <h3 class="ranking-title">この端末のランキング</h3>
+          <ol id="gameover-ranking-list" class="ranking-list"></ol>
+        </div>
+
         <button id="btn-retry" class="btn primary" type="button">もう一度</button>
         <a class="back-link" href="../">← ゲーム一覧へ</a>
       </div>
     </section>
   </div>
-  <script src="game.js?v=20260921f"></script>
+  <script src="game.js?v=20260921g"></script>
 </body>
 </html>

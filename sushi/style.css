@@ -1616,3 +1616,204 @@ body {
     height: 18px !important;
   }
 }
+
+/* —— 追加: 制限時間HUD / ランキング / 新ネタCSSフォールバック (v=20260921g) —— */
+.btn.secondary {
+  background: #fff7ed;
+  color: var(--text);
+  border: 2px solid #fdba74;
+  box-shadow: 0 4px 0 #c2410c;
+  margin-top: 10px;
+}
+.btn.secondary:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #c2410c;
+}
+.btn.small {
+  padding: 8px 18px;
+  font-size: 0.95rem;
+  min-height: 36px;
+}
+
+#btn-place.hidden,
+.hidden {
+  display: none !important;
+}
+
+.hud-item.hud-time .hud-value {
+  color: #0369a1;
+  font-variant-numeric: tabular-nums;
+}
+.hud-item.hud-time .hud-value.urgent {
+  color: #dc2626;
+  animation: time-pulse 0.6s ease-in-out infinite alternate;
+}
+@keyframes time-pulse {
+  from { opacity: 1; }
+  to { opacity: 0.65; }
+}
+
+#hud {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.hud-item {
+  flex: 1 1 18%;
+  min-width: 56px;
+}
+
+.final-meta {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.ranking-panel {
+  margin: 14px 0 16px;
+  padding: 12px;
+  background: #fff7ed;
+  border-radius: 14px;
+  text-align: left;
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid #fed7aa;
+}
+.ranking-title {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+  color: #9a3412;
+  text-align: center;
+}
+.ranking-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.82rem;
+}
+.ranking-list li {
+  display: grid;
+  grid-template-columns: 1.4em 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 0 6px;
+  padding: 6px 4px;
+  border-bottom: 1px dashed #fdba74;
+  align-items: baseline;
+}
+.ranking-list li:last-child {
+  border-bottom: none;
+}
+.ranking-list li.highlight {
+  background: #ffedd5;
+  border-radius: 8px;
+}
+.ranking-list .rank-pos {
+  grid-row: 1 / 3;
+  font-weight: 800;
+  color: #c2410c;
+}
+.ranking-list .rank-name {
+  font-weight: 700;
+}
+.ranking-list .rank-score {
+  font-weight: 800;
+  color: #9a3412;
+}
+.ranking-list .rank-meta {
+  grid-column: 2 / 4;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.ranking-empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 8px !important;
+  display: block !important;
+}
+
+.ranking-form {
+  margin: 12px 0 8px;
+  padding: 12px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8d5c4;
+}
+.ranking-form-label {
+  margin: 0 0 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+.ranking-form-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.ranking-form-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 2px solid #e8d5c4;
+  font-size: 1rem;
+  font-family: inherit;
+}
+.gameover-panel {
+  max-width: 400px;
+  max-height: min(92vh, 720px);
+  overflow-y: auto;
+}
+
+#start-ranking-panel {
+  margin-top: 12px;
+}
+
+/* 新ネタ CSS フォールバック色 */
+.sushi-icon.nigiri.hamachi .si-topping,
+.sushi-icon.ing.hamachi .si-topping {
+  background: linear-gradient(180deg, #ffe08a 0%, #f0c14a 45%, #d4a017 100%);
+}
+.sushi-icon.nigiri.hotate .si-topping,
+.sushi-icon.ing.hotate .si-topping {
+  background: linear-gradient(180deg, #fff8e7 0%, #f5d9a8 50%, #e8c090 100%);
+  border-radius: 50% / 55%;
+}
+.sushi-icon.gunkan.corn .si-topping,
+.sushi-icon.ing.corn .si-topping {
+  background: linear-gradient(180deg, #ffe566 0%, #f5c518 50%, #e0a800 100%);
+  border-radius: 40%;
+}
+.sushi-icon.gunkan.negitoro .si-topping,
+.sushi-icon.ing.negitoro .si-topping {
+  background:
+    linear-gradient(90deg, transparent 30%, rgba(40, 120, 40, 0.55) 32%, transparent 34%,
+      transparent 60%, rgba(40, 120, 40, 0.5) 62%, transparent 64%),
+    linear-gradient(180deg, #e85a6b 0%, #a10f1a 55%, #7a0b14 100%);
+}
+.sushi-icon.maki.natto .si-center {
+  background: linear-gradient(180deg, #6b4f2a 0%, #4a3218 100%);
+  box-shadow: 0 0 0 1px rgba(30, 20, 10, 0.35);
+}
+.sushi-icon.ing.natto .si-topping {
+  background: linear-gradient(180deg, #6b4f2a 0%, #4a3218 100%);
+  border-radius: 40%;
+}
+
+.sushi-emoji-fallback {
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
+}
+
+@media (max-width: 420px) {
+  .hud-item {
+    flex: 1 1 30%;
+    padding: 4px 2px;
+  }
+  .hud-label {
+    font-size: 0.6rem;
+  }
+  .hud-value {
+    font-size: 0.95rem;
+  }
+  .hud-value.lives {
+    font-size: 0.78rem;
+  }
+}

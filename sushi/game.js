@@ -304,7 +304,7 @@
   }
 
   const ICON_BASE = "assets/icons/";
-  const ICON_VER = "20260921g";
+  const ICON_VER = "20260921j";
   const ING_ICON_FILE = {
     shari: "shari.png",
     nori: "nori.png",
@@ -312,19 +312,29 @@
     salmon: "nigiri-salmon.png",
     ebi: "nigiri-ebi.png",
     tamago: "nigiri-tamago.png",
+    hamachi: "nigiri-hamachi.png",
+    hotate: "nigiri-hotate.png",
     ikura: "gunkan-ikura.png",
     uni: "gunkan-uni.png",
+    corn: "gunkan-corn.png",
+    negitoro: "gunkan-negitoro.png",
     cucumber: "maki-kappa.png",
+    natto: "maki-natto.png",
   };
   const SUSHI_ICON_FILE = {
     maguro: "nigiri-maguro.png",
     salmon: "nigiri-salmon.png",
     ebi: "nigiri-ebi.png",
     tamago: "nigiri-tamago.png",
+    hamachi: "nigiri-hamachi.png",
+    hotate: "nigiri-hotate.png",
     ikura: "gunkan-ikura.png",
     uni: "gunkan-uni.png",
+    corn: "gunkan-corn.png",
+    negitoro: "gunkan-negitoro.png",
     kappa: "maki-kappa.png",
     tekka: "maki-tekka.png",
+    natto: "maki-natto.png",
   };
 
   const ART_PX = { sm: 18, md: 20, lg: 22, plate: 18, order: 20, ing: 20, preview: 20 };

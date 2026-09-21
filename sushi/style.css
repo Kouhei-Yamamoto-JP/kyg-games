@@ -225,8 +225,8 @@ body {
   width: 100%;
   max-width: 640px;
   min-height: 0;
-  max-height: 118px;
-  padding: 4px 2px;
+  max-height: 108px;
+  padding: 2px 2px;
   flex-shrink: 0;
   overflow-x: auto;
   overflow-y: hidden;
@@ -379,16 +379,17 @@ body {
 
 /* Belt area */
 #belt-area {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   flex-shrink: 1;
   width: 100%;
   max-width: 1100px;
   min-height: 0;
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 4px 2px;
+  padding: 0 2px 0;
+  margin-bottom: -6px;
 }
 
 #belt-track {
@@ -559,7 +560,7 @@ body {
   position: relative;
   z-index: 25;
   overflow: hidden;
-  max-height: min(42dvh, 320px);
+  max-height: min(48dvh, 360px);
 }
 
 #craft-panel.shake {
@@ -616,7 +617,7 @@ body {
   justify-content: center;
   gap: 6px;
   overflow-y: auto;
-  max-height: 28dvh;
+  max-height: min(150px, 36dvh);
   -webkit-overflow-scrolling: touch;
   pointer-events: auto;
 }
@@ -1331,7 +1332,7 @@ body {
 /* Mobile: keep craft reachable when 5 customers */
 @media (max-width: 600px) {
   #customers {
-    max-height: 96px;
+    max-height: 88px;
     gap: 4px;
     justify-content: flex-start;
     flex-wrap: nowrap !important;
@@ -1361,15 +1362,18 @@ body {
     font-size: 0.62rem;
   }
   #belt-area {
-    min-height: 100px;
-    flex: 1 1 auto;
+    min-height: 96px;
+    flex: 0 1 auto;
+    align-items: flex-start;
+    margin-bottom: -4px;
+    padding: 0 2px;
   }
   #belt-track {
     min-height: 110px;
-    max-height: 160px;
+    max-height: 150px;
   }
   #craft-panel {
-    max-height: min(46dvh, 300px);
+    max-height: min(52dvh, 340px);
     padding: 2px 8px 8px;
     gap: 4px;
   }
@@ -1377,9 +1381,9 @@ body {
     min-height: 40px;
   }
   .ing-btn {
-    min-width: 56px;
-    min-height: 40px;
-    padding: 4px 6px;
+    min-width: 52px;
+    min-height: 38px;
+    padding: 3px 5px;
   }
 }
 
@@ -1392,7 +1396,7 @@ body {
     padding: 2px 6px;
   }
   #customers {
-    max-height: 84px;
+    max-height: 78px;
     flex-wrap: nowrap !important;
   }
   .customer {
@@ -1411,7 +1415,7 @@ body {
 @media (max-width: 600px) {
   #craft-panel {
     overflow: hidden;
-    max-height: min(48dvh, 340px);
+    max-height: min(54dvh, 360px);
   }
   .craft-preview {
     min-height: 36px;
@@ -1427,14 +1431,14 @@ body {
   }
   .craft-ingredients {
     z-index: 20;
-    max-height: 32dvh;
+    max-height: min(132px, 34dvh);
     gap: 4px;
   }
   .ing-btn {
     z-index: 21;
-    min-width: 52px;
-    min-height: 44px;
-    padding: 3px 3px 5px;
+    min-width: 50px;
+    min-height: 38px;
+    padding: 2px 3px 4px;
   }
   .ing-btn .sushi-art,
   .ing-btn .sushi-art.size-sm,

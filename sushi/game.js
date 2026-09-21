@@ -176,6 +176,73 @@
     return (TYPES[typeId] && TYPES[typeId].label) || typeId;
   }
 
+
+  /** CSS sushi / ingredient icon HTML */
+  function wrapIcon(classes, inner, size) {
+    const sz = size ? " size-" + size : "";
+    return (
+      '<span class="sushi-icon ' +
+      classes +
+      sz +
+      '" aria-hidden="true">' +
+      inner +
+      "</span>"
+    );
+  }
+
+  function ingredientIconHTML(ingId, size) {
+    const sz = size || "sm";
+    if (ingId === "shari") {
+      return wrapIcon("ing shari", '<span class="si-rice"></span>', sz);
+    }
+    if (ingId === "nori") {
+      return wrapIcon("ing nori", '<span class="si-sheet"></span>', sz);
+    }
+    // neta topping piece
+    return wrapIcon("ing " + ingId, '<span class="si-topping"></span>', sz);
+  }
+
+  function finishedSushiIconHTML(sushi, size) {
+    const sz = size || "md";
+    if (!sushi) {
+      return wrapIcon("empty-dish", "", sz);
+    }
+    if (sushi.type === "nigiri") {
+      return wrapIcon(
+        "nigiri " + sushi.neta,
+        '<span class="si-rice"></span><span class="si-topping"></span>',
+        sz
+      );
+    }
+    if (sushi.type === "gunkan") {
+      return wrapIcon(
+        "gunkan " + sushi.neta,
+        '<span class="si-nori"></span><span class="si-rice"></span><span class="si-topping"></span>',
+        sz
+      );
+    }
+    if (sushi.type === "maki") {
+      // kappa / tekka use sushi.id for center color
+      return wrapIcon(
+        "maki " + sushi.id,
+        '<span class="si-nori-ring"></span><span class="si-rice-fill"></span><span class="si-center"></span>',
+        sz
+      );
+    }
+    return wrapIcon("empty-dish", "", sz);
+  }
+
+  function previewIconHTML(steps, analysis) {
+    if (analysis.done) {
+      return finishedSushiIconHTML(analysis.done, "lg");
+    }
+    if (steps.length === 0) {
+      return wrapIcon("empty-dish", "", "lg");
+    }
+    return steps.map((id) => ingredientIconHTML(id, "md")).join("");
+  }
+
+
   function progressDist(a, b) {
     const d = Math.abs(a - b);
     return Math.min(d, 1 - d);
@@ -363,12 +430,6 @@
     return typeHint + ": " + marks + " → " + next;
   }
 
-  function previewEmojis(steps, analysis) {
-    if (analysis.done) return analysis.done.emoji;
-    if (steps.length === 0) return "🍽️";
-    return steps.map((id) => INGREDIENTS[id].emoji).join("");
-  }
-
   function resetCraft() {
     if (!state) return;
     state.craftSteps = [];
@@ -388,7 +449,7 @@
     const analysis = analyzeCraft(state.craftSteps);
     state.craftDone = analysis.done;
     craftProgress.textContent = formatProgress(state.craftSteps, analysis);
-    craftPreview.textContent = previewEmojis(state.craftSteps, analysis);
+    craftPreview.innerHTML = previewIconHTML(state.craftSteps, analysis);
     btnPlace.disabled = !analysis.done;
 
     const buttons = craftIngredients.querySelectorAll(".ing-btn");
@@ -446,8 +507,8 @@
       btn.className = "ing-btn " + (ing.kind === "neta" ? "neta" : "base");
       btn.dataset.ingId = id;
       btn.innerHTML =
-        '<span class="ing-emoji">' +
-        ing.emoji +
+        '<span class="ing-icon">' +
+        ingredientIconHTML(id, "sm") +
         '</span><span class="ing-name">' +
         ing.name +
         "</span>";
@@ -472,10 +533,10 @@
       el.classList.add("empty");
       el.classList.remove("filled");
       el.setAttribute("aria-label", "空き皿");
-      const emoji = document.createElement("span");
-      emoji.className = "plate-emoji";
-      emoji.textContent = "　";
-      el.appendChild(emoji);
+      const icon = document.createElement("span");
+      icon.className = "plate-icon";
+      icon.innerHTML = wrapIcon("empty-dish", "", "sm");
+      el.appendChild(icon);
       return;
     }
     el.classList.remove("empty");
@@ -487,10 +548,10 @@
     chip.textContent = typeLabel(plate.sushi.type).charAt(0);
     el.appendChild(chip);
 
-    const emoji = document.createElement("span");
-    emoji.className = "plate-emoji";
-    emoji.textContent = plate.sushi.emoji;
-    el.appendChild(emoji);
+    const icon = document.createElement("span");
+    icon.className = "plate-icon";
+    icon.innerHTML = finishedSushiIconHTML(plate.sushi, "sm");
+    el.appendChild(icon);
 
     const label = document.createElement("span");
     label.className = "plate-label";
@@ -534,8 +595,8 @@
       face +
       "</div>" +
       '<div class="customer-order">' +
-      '<span class="customer-order-emoji">' +
-      sushi.emoji +
+      '<span class="customer-order-icon">' +
+      finishedSushiIconHTML(sushi, "md") +
       "</span>" +
       '<span class="customer-order-name">' +
       sushi.name +
@@ -588,6 +649,15 @@
 
   function showToast(msg, type, duration) {
     toastEl.textContent = msg;
+    toastEl.className = "toast " + (type || "");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toastEl.classList.add("hidden");
+    }, duration || 1000);
+  }
+
+  function showToastHtml(html, type, duration) {
+    toastEl.innerHTML = html;
     toastEl.className = "toast " + (type || "");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => {
@@ -686,13 +756,12 @@
     for (let lv = oldLevel + 1; lv <= Math.min(target, MAX_UNLOCK_LEVEL); lv++) {
       const ids = LEVEL_UNLOCKS[lv];
       if (!ids || !ids.length) continue;
-      const names = ids
-        .map((id) => {
-          const s = SUSHI.find((x) => x.id === id);
-          return s ? s.name : id;
-        })
-        .join("・");
-      showToast("新ネタ解放！" + names, "ok", 2000);
+      const bits = ids.map((id) => {
+        const s = SUSHI.find((x) => x.id === id);
+        if (!s) return id;
+        return finishedSushiIconHTML(s, "sm") + " " + s.name;
+      });
+      showToastHtml("新ネタ解放！ " + bits.join("　"), "ok", 2000);
     }
     if (oldLevel < MAX_UNLOCK_LEVEL && target >= MAX_UNLOCK_LEVEL) {
       // 最終ネタ解放済み

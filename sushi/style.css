@@ -636,6 +636,16 @@ body {
   max-width: 90%;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.toast .sushi-icon {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
 }
 
 .toast.ok {
@@ -723,5 +733,443 @@ body {
   }
   .shop-sign {
     display: none;
+  }
+}
+
+/* —— Sushi / ingredient icons (CSS, not emoji) —— */
+.sushi-icon {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 36px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.sushi-icon.size-sm {
+  width: 28px;
+  height: 28px;
+}
+
+.sushi-icon.size-md {
+  width: 36px;
+  height: 36px;
+}
+
+.sushi-icon.size-lg {
+  width: 48px;
+  height: 48px;
+}
+
+.sushi-icon > * {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+/* Shared rice */
+.sushi-icon .si-rice {
+  background: linear-gradient(180deg, #fffef8 0%, #f5edd8 55%, #e8dcc0 100%);
+  box-shadow:
+    inset 0 -2px 3px rgba(180, 150, 100, 0.35),
+    0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* —— にぎり —— */
+.sushi-icon.nigiri .si-rice {
+  left: 12%;
+  right: 12%;
+  bottom: 8%;
+  height: 42%;
+  border-radius: 50% / 55%;
+}
+
+.sushi-icon.nigiri .si-topping {
+  left: 10%;
+  right: 10%;
+  top: 12%;
+  height: 48%;
+  border-radius: 42% / 48%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.sushi-icon.nigiri.maguro .si-topping {
+  background: linear-gradient(180deg, #e85a6b 0%, #c1121f 45%, #9b0c18 100%);
+}
+
+.sushi-icon.nigiri.salmon .si-topping {
+  background:
+    linear-gradient(90deg, transparent 18%, rgba(255, 240, 220, 0.85) 20%, transparent 22%,
+      transparent 48%, rgba(255, 240, 220, 0.75) 50%, transparent 52%,
+      transparent 72%, rgba(255, 240, 220, 0.7) 74%, transparent 76%),
+    linear-gradient(180deg, #ff9f6b 0%, #ff7a45 40%, #e85d2a 100%);
+}
+
+.sushi-icon.nigiri.ebi .si-topping {
+  left: 14%;
+  right: 14%;
+  top: 8%;
+  height: 55%;
+  border-radius: 60% 60% 45% 45% / 70% 70% 40% 40%;
+  background: linear-gradient(180deg, #ffb4a8 0%, #f4847a 40%, #e06a60 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(180, 60, 50, 0.25),
+    0 1px 2px rgba(0, 0, 0, 0.15);
+  transform: rotate(-8deg);
+}
+
+.sushi-icon.nigiri.ebi .si-topping::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: 28%;
+  height: 2px;
+  background: rgba(180, 70, 60, 0.35);
+  border-radius: 1px;
+  box-shadow: 0 5px 0 rgba(180, 70, 60, 0.28), 0 10px 0 rgba(180, 70, 60, 0.22);
+}
+
+.sushi-icon.nigiri.tamago .si-topping {
+  left: 14%;
+  right: 14%;
+  top: 10%;
+  height: 52%;
+  border-radius: 6px / 8px;
+  background:
+    linear-gradient(90deg, transparent 28%, rgba(120, 70, 20, 0.45) 30%, transparent 32%,
+      transparent 62%, rgba(120, 70, 20, 0.4) 64%, transparent 66%),
+    linear-gradient(180deg, #ffe566 0%, #f4c430 50%, #e0a820 100%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+  border: 1.5px solid #8b5a12;
+}
+
+/* —— 軍艦 —— */
+.sushi-icon.gunkan .si-rice {
+  left: 18%;
+  right: 18%;
+  bottom: 10%;
+  height: 48%;
+  border-radius: 40% / 45%;
+}
+
+.sushi-icon.gunkan .si-nori {
+  left: 14%;
+  right: 14%;
+  bottom: 6%;
+  height: 58%;
+  border-radius: 8px 8px 10px 10px;
+  background: linear-gradient(90deg, #1a2e1a 0%, #0d1f0d 40%, #243824 70%, #0a180a 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  z-index: 1;
+}
+
+.sushi-icon.gunkan .si-rice {
+  z-index: 2;
+  left: 22%;
+  right: 22%;
+  bottom: 14%;
+  height: 40%;
+}
+
+.sushi-icon.gunkan .si-topping {
+  left: 22%;
+  right: 22%;
+  top: 10%;
+  height: 42%;
+  z-index: 3;
+  border-radius: 50% 50% 40% 40% / 55% 55% 40% 40%;
+}
+
+.sushi-icon.gunkan.ikura .si-topping {
+  background: transparent;
+  box-shadow: none;
+}
+
+.sushi-icon.gunkan.ikura .si-topping::before,
+.sushi-icon.gunkan.ikura .si-topping::after {
+  content: "";
+  position: absolute;
+  width: 38%;
+  height: 38%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffb347, #e85d04 55%, #c2410c 100%);
+  box-shadow:
+    0 0 0 1px rgba(150, 40, 0, 0.25),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.2),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.45);
+}
+
+.sushi-icon.gunkan.ikura .si-topping::before {
+  left: 8%;
+  top: 18%;
+  box-shadow:
+    0 0 0 1px rgba(150, 40, 0, 0.25),
+    inset -1px -1px 2px rgba(0, 0, 0, 0.2),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.45),
+    22px 4px 0 0 #ff8c2a,
+    11px 16px 0 0 #e85d04,
+    28px 18px 0 -1px #f97316;
+}
+
+.sushi-icon.gunkan.ikura .si-topping::after {
+  right: 6%;
+  top: 8%;
+  width: 34%;
+  height: 34%;
+  background: radial-gradient(circle at 35% 30%, #ffc078, #ea580c 60%, #c2410c);
+}
+
+.sushi-icon.gunkan.uni .si-topping {
+  background:
+    repeating-linear-gradient(
+      95deg,
+      #fbbf24 0 18%,
+      #f59e0b 18% 36%,
+      #fcd34d 36% 52%,
+      #d97706 52% 70%,
+      #fbbf24 70% 88%,
+      #ea580c 88% 100%
+    );
+  border-radius: 45% 45% 35% 35% / 60% 60% 35% 35%;
+  box-shadow:
+    inset 0 -2px 4px rgba(120, 60, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* —— 巻物 —— */
+.sushi-icon.maki .si-nori-ring {
+  inset: 8%;
+  border-radius: 50%;
+  background: #0d1f0d;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.sushi-icon.maki .si-rice-fill {
+  inset: 18%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fffef8, #efe4c8);
+}
+
+.sushi-icon.maki .si-center {
+  left: 38%;
+  right: 38%;
+  top: 38%;
+  bottom: 38%;
+  border-radius: 50%;
+}
+
+.sushi-icon.maki.kappa .si-center {
+  background: linear-gradient(135deg, #86efac, #16a34a 55%, #15803d);
+  border-radius: 30%;
+  transform: rotate(20deg);
+}
+
+.sushi-icon.maki.tekka .si-center {
+  background: linear-gradient(135deg, #f87171, #dc2626 50%, #991b1b);
+}
+
+/* —— Ingredient-only icons —— */
+.sushi-icon.ing.shari .si-rice {
+  left: 15%;
+  right: 15%;
+  top: 28%;
+  bottom: 22%;
+  border-radius: 50% / 55%;
+}
+
+.sushi-icon.ing.nori .si-sheet {
+  left: 18%;
+  right: 18%;
+  top: 16%;
+  bottom: 16%;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #1a3320 0%, #0a180a 45%, #243d28 70%, #0d1f0d 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.sushi-icon.ing.maguro .si-topping,
+.sushi-icon.ing.salmon .si-topping,
+.sushi-icon.ing.ebi .si-topping,
+.sushi-icon.ing.tamago .si-topping {
+  left: 12%;
+  right: 12%;
+  top: 28%;
+  bottom: 28%;
+  border-radius: 42% / 50%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.sushi-icon.ing.maguro .si-topping {
+  background: linear-gradient(180deg, #e85a6b 0%, #c1121f 50%, #9b0c18 100%);
+}
+
+.sushi-icon.ing.salmon .si-topping {
+  background:
+    linear-gradient(90deg, transparent 20%, rgba(255, 240, 220, 0.85) 22%, transparent 24%,
+      transparent 55%, rgba(255, 240, 220, 0.75) 57%, transparent 59%),
+    linear-gradient(180deg, #ff9f6b 0%, #ff7a45 45%, #e85d2a 100%);
+}
+
+.sushi-icon.ing.ebi .si-topping {
+  border-radius: 60% 60% 45% 45% / 70% 70% 40% 40%;
+  background: linear-gradient(180deg, #ffb4a8 0%, #f4847a 45%, #e06a60 100%);
+  transform: rotate(-12deg);
+  top: 22%;
+  bottom: 22%;
+}
+
+.sushi-icon.ing.tamago .si-topping {
+  border-radius: 5px;
+  background:
+    linear-gradient(90deg, transparent 30%, rgba(120, 70, 20, 0.45) 32%, transparent 34%,
+      transparent 64%, rgba(120, 70, 20, 0.4) 66%, transparent 68%),
+    linear-gradient(180deg, #ffe566 0%, #f4c430 50%, #e0a820 100%);
+  border: 1.5px solid #8b5a12;
+  left: 18%;
+  right: 18%;
+  top: 24%;
+  bottom: 24%;
+}
+
+.sushi-icon.ing.ikura .si-topping {
+  inset: 18%;
+  background: transparent;
+  box-shadow: none;
+}
+
+.sushi-icon.ing.ikura .si-topping::before {
+  content: "";
+  position: absolute;
+  width: 42%;
+  height: 42%;
+  left: 8%;
+  top: 20%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ffb347, #e85d04 55%, #c2410c);
+  box-shadow:
+    16px -2px 0 0 #ff8c2a,
+    8px 14px 0 0 #ea580c,
+    20px 12px 0 -1px #f97316,
+    inset 1px 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+.sushi-icon.ing.uni .si-topping {
+  left: 16%;
+  right: 16%;
+  top: 26%;
+  bottom: 26%;
+  border-radius: 45% / 55%;
+  background:
+    repeating-linear-gradient(
+      100deg,
+      #fbbf24 0 18%,
+      #f59e0b 18% 36%,
+      #fcd34d 36% 52%,
+      #d97706 52% 70%,
+      #fbbf24 70% 88%,
+      #ea580c 88% 100%
+    );
+  box-shadow: inset 0 -2px 3px rgba(120, 60, 0, 0.25);
+}
+
+.sushi-icon.ing.cucumber .si-topping {
+  left: 38%;
+  right: 38%;
+  top: 16%;
+  bottom: 16%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #86efac, #16a34a 50%, #15803d);
+  box-shadow: inset 0 0 0 1px rgba(0, 80, 0, 0.25);
+}
+
+/* Empty / plate placeholder */
+.sushi-icon.empty-dish {
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff 0%, #f0e6d8 55%, #d4c4a8 100%);
+  box-shadow: inset 0 0 0 2px #e8dcc8;
+  opacity: 0.7;
+}
+
+/* Craft / plate / customer icon slots */
+.craft-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 52px;
+  font-size: inherit;
+  letter-spacing: 0;
+}
+
+.craft-preview .sushi-icon + .sushi-icon {
+  margin-left: 2px;
+}
+
+.ing-btn .ing-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+}
+
+.ing-btn .sushi-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.plate-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.plate .sushi-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.plate.empty .plate-icon {
+  opacity: 0;
+}
+
+.customer-order-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+}
+
+.customer-order-icon .sushi-icon {
+  width: 36px;
+  height: 36px;
+}
+
+@media (min-width: 600px) {
+  .plate .sushi-icon {
+    width: 34px;
+    height: 34px;
+  }
+  .customer-order-icon .sushi-icon {
+    width: 40px;
+    height: 40px;
+  }
+  .ing-btn .sushi-icon {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+@media (max-height: 640px) {
+  .plate .sushi-icon {
+    width: 26px;
+    height: 26px;
+  }
+  .craft-preview .sushi-icon.size-lg {
+    width: 40px;
+    height: 40px;
   }
 }

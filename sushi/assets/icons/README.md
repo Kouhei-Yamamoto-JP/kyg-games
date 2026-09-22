@@ -25,6 +25,28 @@ Generated with Codex `gpt-5.6-luna` + built-in `image_gen` (realistic sushi food
 | `neta-corn.png` | Corn kernels mound (topping only) | コーン（ネタ） |
 | `neta-negitoro.png` | Negitoro mound (topping only) | ねぎとろ（ネタ） |
 | `neta-natto.png` | Natto sticky beans (topping only) | 納豆（ネタ） |
+| `nigiri-ika.png` | Squid (ika) nigiri | いか握り |
+| `nigiri-tako.png` | Octopus (tako) nigiri | たこ握り |
+| `nigiri-anago.png` | Saltwater eel (anago) nigiri | あなご握り |
+| `nigiri-engawa.png` | Flounder fin (engawa) nigiri | えんがわ握り |
+| `nigiri-awabi.png` | Abalone (awabi) nigiri | あわび握り |
+| `nigiri-kani.png` | Crab (kani) nigiri | かに握り |
+| `gunkan-mentaiko.png` | Mentaiko gunkan | めんたい軍艦 |
+| `gunkan-tsunamayo.png` | Tuna mayo gunkan | ツナマヨ軍艦 |
+| `maki-umeshiso.png` | Ume shiso maki — 4 upright pieces (conveyor-sushi style) | 梅しそ巻 |
+| `maki-salad.png` | Salad maki — 4 upright pieces (conveyor-sushi style) | サラダ巻 |
+| `maki-kampyo.png` | Kampyo maki — 4 upright pieces (conveyor-sushi style) | かんぴょう巻 |
+| `neta-ika.png` | Squid slice (topping only) | いか（ネタ） |
+| `neta-tako.png` | Octopus slice (topping only) | たこ（ネタ） |
+| `neta-anago.png` | Anago fillet (topping only) | あなご（ネタ） |
+| `neta-engawa.png` | Engawa strip (topping only) | えんがわ（ネタ） |
+| `neta-awabi.png` | Abalone slice (topping only) | あわび（ネタ） |
+| `neta-kani.png` | Crab meat (topping only) | かに（ネタ） |
+| `neta-mentaiko.png` | Mentaiko mound (topping only) | めんたい（ネタ） |
+| `neta-tsunamayo.png` | Tuna mayo mound (topping only) | ツナマヨ（ネタ） |
+| `neta-umeshiso.png` | Ume + shiso filling (topping only) | 梅しそ（ネタ） |
+| `neta-salad.png` | Salad mix filling (topping only) | サラダ（ネタ） |
+| `neta-kampyo.png` | Kampyo strips (topping only) | かんぴょう（ネタ） |
 
 All files: square 256×256, RGBA with true alpha background.
 Postprocess: magenta (#FF00FF) chroma-key only (edge flood-fill); near-black nori is never knocked out.

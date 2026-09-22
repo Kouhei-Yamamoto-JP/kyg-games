@@ -325,7 +325,7 @@
       const list = LEVEL_UNLOCKS[lv];
       if (list) ids.push.apply(ids, list);
     }
-    if (state && state.tokiAvailable && ids.indexOf("toki") < 0) ids.push("toki");
+    if (isTokiUsable() && ids.indexOf("toki") < 0) ids.push("toki");
     return ids;
   }
 
@@ -335,7 +335,7 @@
 
   function getUnlockedSushi(level) {
     const ids = new Set(getUnlockedSushiIds(level));
-    if (state && state.tokiAvailable) ids.add("toki");
+    if (isTokiUsable()) ids.add("toki");
     return SUSHI.filter((s) => ids.has(s.id));
   }
 
@@ -346,13 +346,27 @@
     return types;
   }
 
+  function hasTokiOrder() {
+    return !!(
+      state &&
+      state.customers &&
+      state.customers.some(function (c) {
+        return c.sushi && c.sushi.id === "toki" && !c.serving;
+      })
+    );
+  }
+
+  function isTokiUsable() {
+    return !!(state && (state.tokiAvailable || hasTokiOrder()));
+  }
+
   function getUnlockedIngredientIds(level) {
     const ids = new Set(["shari"]);
     if (level >= 3) ids.add("nori"); // 軍艦・巻物用
     for (const s of getUnlockedSushi(level)) {
       ids.add(s.neta);
     }
-    if (state && state.tokiAvailable) ids.add("toki");
+    if (isTokiUsable()) ids.add("toki");
     return ids;
   }
 
@@ -361,7 +375,7 @@
     const all = NETA_BY_TYPE[typeId] || [];
     return all.filter((netaId) => {
       if (netaId === "toki") {
-        return !!(state && state.tokiAvailable);
+        return isTokiUsable();
       }
       const sushi = findSushiByTypeAndNeta(typeId, netaId);
       return sushi && unlocked.has(sushi.id);
@@ -369,14 +383,9 @@
   }
 
   function pickSushi() {
-    if (state && state.tokiAvailable) {
-      const hasTokiOrder = state.customers.some(function (c) {
-        return c.sushi && c.sushi.id === "toki";
-      });
-      if (!hasTokiOrder) {
-        const toki = SUSHI.find(function (s) { return s.id === "toki"; });
-        if (toki) return toki;
-      }
+    if (state && state.tokiAvailable && !hasTokiOrder()) {
+      const toki = SUSHI.find(function (s) { return s.id === "toki"; });
+      if (toki) return toki;
     }
     const list = getUnlockedSushi(state.level).filter(function (s) {
       return !s.special;
@@ -811,6 +820,7 @@
       "negitoro",
       "cucumber",
       "natto",
+      "toki",
     ];
     for (const id of order) {
       if (!unlocked.has(id)) continue;
@@ -1264,6 +1274,7 @@
       }
       renderCustomers(true);
     }
+    buildIngredientButtons();
     showToast("⏰ ときネタ出現！届けると時間延長", "ok", 2200);
   }
 

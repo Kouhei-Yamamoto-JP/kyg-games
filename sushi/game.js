@@ -432,7 +432,7 @@
   }
 
   const ICON_BASE = "assets/icons/";
-  const ICON_VER = "20260922h";
+  const ICON_VER = "20260922i";
   const ING_ICON_FILE = {
     shari: "shari.png",
     nori: "nori.png",
@@ -916,7 +916,8 @@
     if (!craftPanel || !craftIngredients) return;
     const count = craftIngredients.querySelectorAll(".ing-btn").length;
     const narrow = window.matchMedia("(max-width: 600px)").matches;
-    const perRow = narrow ? 5 : 7;
+    // 1列5個想定。最大解放(シャリ+海苔+ネタ23=25)でちょうど5段
+    const perRow = 5;
     // 2〜5段。ネタ解放でボタンが増えるほど枠を広げる
     let rows = Math.ceil(count / perRow);
     if (rows < 2) rows = 2;

@@ -23,7 +23,6 @@
     hotate: { id: "hotate", name: "ほたて", emoji: "🐚", kind: "neta" },
     ikura: { id: "ikura", name: "いくら", emoji: "🟠", kind: "neta" },
     uni: { id: "uni", name: "うに", emoji: "🟡", kind: "neta" },
-    corn: { id: "corn", name: "コーン", emoji: "🌽", kind: "neta" },
     negitoro: { id: "negitoro", name: "ねぎとろ", emoji: "🧅", kind: "neta" },
     cucumber: { id: "cucumber", name: "きゅうり", emoji: "🥒", kind: "neta" },
     natto: { id: "natto", name: "納豆", emoji: "🫘", kind: "neta" },
@@ -51,7 +50,6 @@
     { id: "hotate", name: "ほたて", emoji: "🐚", type: "nigiri", neta: "hotate", weight: 2 },
     { id: "ikura", name: "いくら", emoji: "🟠", type: "gunkan", neta: "ikura", weight: 2 },
     { id: "uni", name: "うに", emoji: "🟡", type: "gunkan", neta: "uni", weight: 2 },
-    { id: "corn", name: "コーン軍艦", emoji: "🌽", type: "gunkan", neta: "corn", weight: 2 },
     { id: "negitoro", name: "ねぎとろ軍艦", emoji: "🧅", type: "gunkan", neta: "negitoro", weight: 2 },
     { id: "kappa", name: "かっぱ巻", emoji: "🥒", type: "maki", neta: "cucumber", weight: 2 },
     { id: "tekka", name: "鉄火巻", emoji: "🍱", type: "maki", neta: "maguro", weight: 2 },
@@ -73,7 +71,7 @@
   // タイプ別に使えるネタ（全体）
   const NETA_BY_TYPE = {
     nigiri: ["maguro", "salmon", "ebi", "tamago", "hamachi", "hotate", "ika", "tako", "anago", "engawa", "awabi", "kani", "toki"],
-    gunkan: ["ikura", "uni", "corn", "negitoro", "mentaiko", "tsunamayo", "salad", "mayocorn"],
+    gunkan: ["ikura", "uni", "mayocorn", "negitoro", "mentaiko", "tsunamayo", "salad"],
     maki: ["cucumber", "maguro", "natto", "kampyo"],
   };
 
@@ -87,13 +85,13 @@
     3: ["ikura", "uni"],
     8: ["kappa", "tekka"],
     13: ["hamachi", "hotate"],
-    18: ["corn", "negitoro"],
+    18: ["mayocorn", "negitoro"],
     23: ["natto"],
     28: ["ika", "tako"],
     33: ["anago", "engawa"],
     38: ["awabi", "kani"],
     43: ["mentaiko", "tsunamayo"],
-    48: ["mayocorn", "salad"],
+    48: ["salad"],
     50: ["kampyo"],
   };
   const MAX_UNLOCK_LEVEL = 50;
@@ -432,7 +430,7 @@
   }
 
   const ICON_BASE = "assets/icons/";
-  const ICON_VER = "20260922k";
+  const ICON_VER = "20260922m";
   const ING_ICON_FILE = {
     shari: "shari.png",
     nori: "nori.png",
@@ -444,7 +442,6 @@
     hotate: "neta-hotate.png",
     ikura: "gunkan-ikura.png",
     uni: "gunkan-uni.png",
-    corn: "neta-corn.png",
     negitoro: "neta-negitoro.png",
     cucumber: "maki-kappa.png",
     natto: "neta-natto.png",
@@ -459,6 +456,7 @@
     mayocorn: "neta-mayocorn.png",
     salad: "neta-salad.png",
     kampyo: "neta-kampyo.png",
+    toki: "neta-toki.png",
   };
   const SUSHI_ICON_FILE = {
     maguro: "nigiri-maguro.png",
@@ -469,7 +467,6 @@
     hotate: "nigiri-hotate.png",
     ikura: "gunkan-ikura.png",
     uni: "gunkan-uni.png",
-    corn: "gunkan-corn.png",
     negitoro: "gunkan-negitoro.png",
     kappa: "maki-kappa.png",
     tekka: "maki-tekka.png",
@@ -485,6 +482,7 @@
     mayocorn: "gunkan-mayocorn.png",
     salad: "gunkan-salad.png",
     kampyo: "maki-kampyo.png",
+    toki: "nigiri-toki.png",
   };
 
   const ART_PX = { sm: 18, md: 20, lg: 22, plate: 18, order: 20, ing: 20, preview: 20 };
@@ -550,7 +548,7 @@
       return wrapIcon("ing nori", '<span class="si-sheet"></span>', sz);
     }
     // 画像なしネタ: CSS トッピング色 + 絵文字フォールバック併用
-    if (ing && ["hamachi", "hotate", "corn", "negitoro", "natto"].indexOf(ingId) >= 0) {
+    if (ing && ["hamachi", "hotate", "mayocorn", "negitoro", "natto"].indexOf(ingId) >= 0) {
       return (
         wrapIcon("ing " + ingId, '<span class="si-topping"></span>', sz) ||
         emojiFallback(ing.emoji, sz)
@@ -856,32 +854,36 @@
     craftIngredients.innerHTML = "";
     const level = state ? state.level : 1;
     const unlocked = getUnlockedIngredientIds(level);
+    // 種類ごと: ベース → 握りネタ → 軍艦ネタ → 巻ネタ → とき（末尾＝右下）
     const order = [
       "shari",
       "nori",
+      // 握り系
       "maguro",
       "salmon",
       "ebi",
       "tamago",
       "hamachi",
       "hotate",
-      "ikura",
-      "uni",
-      "corn",
-      "negitoro",
-      "cucumber",
-      "natto",
       "ika",
       "tako",
       "anago",
       "engawa",
       "awabi",
       "kani",
+      // 軍艦系
+      "ikura",
+      "uni",
+      "mayocorn",
+      "negitoro",
       "mentaiko",
       "tsunamayo",
-      "mayocorn",
       "salad",
+      // 巻物系
+      "cucumber",
+      "natto",
       "kampyo",
+      // 特殊（常に最後＝最大時は右下）
       "toki",
     ];
     for (const id of order) {
@@ -914,16 +916,42 @@
 
   function syncCraftPanelSize() {
     if (!craftPanel || !craftIngredients) return;
-    const count = craftIngredients.querySelectorAll(".ing-btn").length;
-    const narrow = window.matchMedia("(max-width: 600px)").matches;
-    // 1列5個想定。最大解放(シャリ+海苔+ネタ23=25)でちょうど5段
-    const perRow = 5;
-    // 2〜5段。ネタ解放でボタンが増えるほど枠を広げる
+    const btns = craftIngredients.querySelectorAll(".ing-btn");
+    const count = btns.length;
+    // 横6個 × 最大4段（とき含むと最大25なので4段+α）
+    const perRow = 6;
     let rows = Math.ceil(count / perRow);
     if (rows < 2) rows = 2;
     if (rows > 5) rows = 5;
     craftPanel.dataset.ingRows = String(rows);
     craftIngredients.dataset.ingRows = String(rows);
+    craftIngredients.style.gridTemplateColumns = "repeat(6, minmax(0, 1fr))";
+
+    // 配置: 低レベルは左詰め。最大付近でときを4段目右端へ
+    const tokiBtn = craftIngredients.querySelector('.ing-btn[data-ing-id="toki"]');
+    const others = Array.prototype.slice.call(btns).filter(function (b) {
+      return b.dataset.ingId !== "toki";
+    });
+    others.forEach(function (b) {
+      b.style.gridColumn = "";
+      b.style.gridRow = "";
+    });
+    if (tokiBtn) {
+      tokiBtn.style.gridColumn = "";
+      tokiBtn.style.gridRow = "";
+    }
+    // 通常ネタが23個以上（最大構成）のとき、ときを 4段目・6列目（右下）に固定
+    if (tokiBtn && others.length >= 23) {
+      others.forEach(function (b, i) {
+        if (i >= 23) return;
+        b.style.gridColumn = String((i % 6) + 1);
+        b.style.gridRow = String(Math.floor(i / 6) + 1);
+      });
+      tokiBtn.style.gridColumn = "6";
+      tokiBtn.style.gridRow = "4";
+      craftPanel.dataset.ingRows = "4";
+      craftIngredients.dataset.ingRows = "4";
+    }
   }
 
   let craftResizeTimer = null;

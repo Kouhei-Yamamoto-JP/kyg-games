@@ -627,9 +627,9 @@ body {
   order: 2;
   position: relative;
   z-index: 10;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  justify-items: stretch;
   gap: 6px;
   overflow-y: auto;
   max-height: min(200px, 36dvh);

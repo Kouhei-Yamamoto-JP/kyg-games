@@ -27,6 +27,17 @@
     negitoro: { id: "negitoro", name: "ねぎとろ", emoji: "🧅", kind: "neta" },
     cucumber: { id: "cucumber", name: "きゅうり", emoji: "🥒", kind: "neta" },
     natto: { id: "natto", name: "納豆", emoji: "🫘", kind: "neta" },
+    ika: { id: "ika", name: "いか", emoji: "🦑", kind: "neta" },
+    tako: { id: "tako", name: "たこ", emoji: "🐙", kind: "neta" },
+    anago: { id: "anago", name: "あなご", emoji: "🌊", kind: "neta" },
+    engawa: { id: "engawa", name: "えんがわ", emoji: "🐟", kind: "neta" },
+    awabi: { id: "awabi", name: "あわび", emoji: "🦪", kind: "neta" },
+    kani: { id: "kani", name: "かに", emoji: "🦀", kind: "neta" },
+    mentaiko: { id: "mentaiko", name: "めんたい", emoji: "🌶️", kind: "neta" },
+    tsunamayo: { id: "tsunamayo", name: "ツナマヨ", emoji: "🥪", kind: "neta" },
+    umeshiso: { id: "umeshiso", name: "梅しそ", emoji: "🟣", kind: "neta" },
+    salad: { id: "salad", name: "サラダ", emoji: "🥗", kind: "neta" },
+    kampyo: { id: "kampyo", name: "かんぴょう", emoji: "🤎", kind: "neta" },
     toki: { id: "toki", name: "ときネタ", emoji: "⏰", kind: "neta", special: true },
   };
 
@@ -45,19 +56,31 @@
     { id: "kappa", name: "かっぱ巻", emoji: "🥒", type: "maki", neta: "cucumber", weight: 2 },
     { id: "tekka", name: "鉄火巻", emoji: "🍱", type: "maki", neta: "maguro", weight: 2 },
     { id: "natto", name: "納豆巻", emoji: "🫘", type: "maki", neta: "natto", weight: 2 },
+    { id: "ika", name: "いか", emoji: "🦑", type: "nigiri", neta: "ika", weight: 2 },
+    { id: "tako", name: "たこ", emoji: "🐙", type: "nigiri", neta: "tako", weight: 2 },
+    { id: "anago", name: "あなご", emoji: "🌊", type: "nigiri", neta: "anago", weight: 2 },
+    { id: "engawa", name: "えんがわ", emoji: "🐟", type: "nigiri", neta: "engawa", weight: 2 },
+    { id: "awabi", name: "あわび", emoji: "🦪", type: "nigiri", neta: "awabi", weight: 2 },
+    { id: "kani", name: "かに", emoji: "🦀", type: "nigiri", neta: "kani", weight: 2 },
+    { id: "mentaiko", name: "めんたい軍艦", emoji: "🌶️", type: "gunkan", neta: "mentaiko", weight: 2 },
+    { id: "tsunamayo", name: "ツナマヨ軍艦", emoji: "🥪", type: "gunkan", neta: "tsunamayo", weight: 2 },
+    { id: "umeshiso", name: "梅しそ巻", emoji: "🟣", type: "maki", neta: "umeshiso", weight: 2 },
+    { id: "salad", name: "サラダ巻", emoji: "🥗", type: "maki", neta: "salad", weight: 2 },
+    { id: "kampyo", name: "かんぴょう巻", emoji: "🤎", type: "maki", neta: "kampyo", weight: 2 },
     { id: "toki", name: "とき寿司", emoji: "⏰", type: "nigiri", neta: "toki", weight: 0, special: true, timeExtend: true },
   ];
 
   // タイプ別に使えるネタ（全体）
   const NETA_BY_TYPE = {
-    nigiri: ["maguro", "salmon", "ebi", "tamago", "hamachi", "hotate", "toki"],
-    gunkan: ["ikura", "uni", "corn", "negitoro"],
-    maki: ["cucumber", "maguro", "natto"],
+    nigiri: ["maguro", "salmon", "ebi", "tamago", "hamachi", "hotate", "ika", "tako", "anago", "engawa", "awabi", "kani", "toki"],
+    gunkan: ["ikura", "uni", "corn", "negitoro", "mentaiko", "tsunamayo"],
+    maki: ["cucumber", "maguro", "natto", "umeshiso", "salad", "kampyo"],
   };
 
   // レベルで解放される寿司 ID（累積）
   // 解放マイルストーン: Lv1〜3は少なめ、以降は5レベルごと
   // Lv1〜3は少なめ。以降は必ず +5 レベルごと（8,13,18,23）
+  // Lv1〜3少なめ → +5刻み。Lv30≒3段 / Lv40≒4段 / Lv50≒5段の材料数になるよう追加
   const LEVEL_UNLOCKS = {
     1: ["maguro", "salmon"],
     2: ["ebi", "tamago"],
@@ -66,8 +89,14 @@
     13: ["hamachi", "hotate"],
     18: ["corn", "negitoro"],
     23: ["natto"],
+    28: ["ika", "tako"],
+    33: ["anago", "engawa"],
+    38: ["awabi", "kani"],
+    43: ["mentaiko", "tsunamayo"],
+    48: ["umeshiso", "salad"],
+    50: ["kampyo"],
   };
-  const MAX_UNLOCK_LEVEL = 23;
+  const MAX_UNLOCK_LEVEL = 50;
   const SERVES_PER_LEVEL = 10;
 
   // お客さんのベルト座席（楕円 progress 0..1、上弧付近）
@@ -403,7 +432,7 @@
   }
 
   const ICON_BASE = "assets/icons/";
-  const ICON_VER = "20260921k";
+  const ICON_VER = "20260922a";
   const ING_ICON_FILE = {
     shari: "shari.png",
     nori: "nori.png",
@@ -419,6 +448,17 @@
     negitoro: "neta-negitoro.png",
     cucumber: "maki-kappa.png",
     natto: "neta-natto.png",
+    ika: "neta-ika.png",
+    tako: "neta-tako.png",
+    anago: "neta-anago.png",
+    engawa: "neta-engawa.png",
+    awabi: "neta-awabi.png",
+    kani: "neta-kani.png",
+    mentaiko: "neta-mentaiko.png",
+    tsunamayo: "neta-tsunamayo.png",
+    umeshiso: "neta-umeshiso.png",
+    salad: "neta-salad.png",
+    kampyo: "neta-kampyo.png",
   };
   const SUSHI_ICON_FILE = {
     maguro: "nigiri-maguro.png",
@@ -434,6 +474,17 @@
     kappa: "maki-kappa.png",
     tekka: "maki-tekka.png",
     natto: "maki-natto.png",
+    ika: "nigiri-ika.png",
+    tako: "nigiri-tako.png",
+    anago: "nigiri-anago.png",
+    engawa: "nigiri-engawa.png",
+    awabi: "nigiri-awabi.png",
+    kani: "nigiri-kani.png",
+    mentaiko: "gunkan-mentaiko.png",
+    tsunamayo: "gunkan-tsunamayo.png",
+    umeshiso: "maki-umeshiso.png",
+    salad: "maki-salad.png",
+    kampyo: "maki-kampyo.png",
   };
 
   const ART_PX = { sm: 18, md: 20, lg: 22, plate: 18, order: 20, ing: 20, preview: 20 };
@@ -820,6 +871,17 @@
       "negitoro",
       "cucumber",
       "natto",
+      "ika",
+      "tako",
+      "anago",
+      "engawa",
+      "awabi",
+      "kani",
+      "mentaiko",
+      "tsunamayo",
+      "umeshiso",
+      "salad",
+      "kampyo",
       "toki",
     ];
     for (const id of order) {

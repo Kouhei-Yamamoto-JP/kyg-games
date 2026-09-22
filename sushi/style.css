@@ -617,7 +617,7 @@ body {
   justify-content: center;
   gap: 6px;
   overflow-y: auto;
-  max-height: min(150px, 36dvh);
+  max-height: min(260px, 48dvh);
   -webkit-overflow-scrolling: touch;
   pointer-events: auto;
 }
@@ -1431,7 +1431,7 @@ body {
   }
   .craft-ingredients {
     z-index: 20;
-    max-height: min(132px, 34dvh);
+    max-height: min(220px, 42dvh);
     gap: 4px;
   }
   .ing-btn {
@@ -1879,4 +1879,14 @@ body {
 .customer.toki-order {
   border-color: #f4a261;
   box-shadow: 0 0 0 2px rgba(244, 162, 97, 0.4);
+}
+
+/* 高レベルで材料5段まで見えるよう余白 */
+.craft-ingredients {
+  max-height: min(260px, 48dvh);
+}
+@media (max-width: 600px) {
+  .craft-ingredients {
+    max-height: min(220px, 42dvh);
+  }
 }

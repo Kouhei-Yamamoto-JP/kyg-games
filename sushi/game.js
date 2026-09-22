@@ -35,7 +35,7 @@
     kani: { id: "kani", name: "かに", emoji: "🦀", kind: "neta" },
     mentaiko: { id: "mentaiko", name: "めんたい", emoji: "🌶️", kind: "neta" },
     tsunamayo: { id: "tsunamayo", name: "ツナマヨ", emoji: "🥪", kind: "neta" },
-    umeshiso: { id: "umeshiso", name: "梅しそ", emoji: "🟣", kind: "neta" },
+    mayocorn: { id: "mayocorn", name: "マヨコーン", emoji: "🌽", kind: "neta" },
     salad: { id: "salad", name: "サラダ", emoji: "🥗", kind: "neta" },
     kampyo: { id: "kampyo", name: "かんぴょう", emoji: "🤎", kind: "neta" },
     toki: { id: "toki", name: "ときネタ", emoji: "⏰", kind: "neta", special: true },
@@ -64,7 +64,7 @@
     { id: "kani", name: "かに", emoji: "🦀", type: "nigiri", neta: "kani", weight: 2 },
     { id: "mentaiko", name: "めんたい軍艦", emoji: "🌶️", type: "gunkan", neta: "mentaiko", weight: 2 },
     { id: "tsunamayo", name: "ツナマヨ軍艦", emoji: "🥪", type: "gunkan", neta: "tsunamayo", weight: 2 },
-    { id: "umeshiso", name: "梅しそ巻", emoji: "🟣", type: "maki", neta: "umeshiso", weight: 2 },
+    { id: "mayocorn", name: "マヨコーン軍艦", emoji: "🌽", type: "gunkan", neta: "mayocorn", weight: 2 },
     { id: "salad", name: "サラダ軍艦", emoji: "🥗", type: "gunkan", neta: "salad", weight: 2 },
     { id: "kampyo", name: "かんぴょう巻", emoji: "🤎", type: "maki", neta: "kampyo", weight: 2 },
     { id: "toki", name: "とき寿司", emoji: "⏰", type: "nigiri", neta: "toki", weight: 0, special: true, timeExtend: true },
@@ -73,8 +73,8 @@
   // タイプ別に使えるネタ（全体）
   const NETA_BY_TYPE = {
     nigiri: ["maguro", "salmon", "ebi", "tamago", "hamachi", "hotate", "ika", "tako", "anago", "engawa", "awabi", "kani", "toki"],
-    gunkan: ["ikura", "uni", "corn", "negitoro", "mentaiko", "tsunamayo", "salad"],
-    maki: ["cucumber", "maguro", "natto", "umeshiso", "kampyo"],
+    gunkan: ["ikura", "uni", "corn", "negitoro", "mentaiko", "tsunamayo", "salad", "mayocorn"],
+    maki: ["cucumber", "maguro", "natto", "kampyo"],
   };
 
   // レベルで解放される寿司 ID（累積）
@@ -93,7 +93,7 @@
     33: ["anago", "engawa"],
     38: ["awabi", "kani"],
     43: ["mentaiko", "tsunamayo"],
-    48: ["umeshiso", "salad"],
+    48: ["mayocorn", "salad"],
     50: ["kampyo"],
   };
   const MAX_UNLOCK_LEVEL = 50;
@@ -432,7 +432,7 @@
   }
 
   const ICON_BASE = "assets/icons/";
-  const ICON_VER = "20260922f";
+  const ICON_VER = "20260922g";
   const ING_ICON_FILE = {
     shari: "shari.png",
     nori: "nori.png",
@@ -456,7 +456,7 @@
     kani: "neta-kani.png",
     mentaiko: "neta-mentaiko.png",
     tsunamayo: "neta-tsunamayo.png",
-    umeshiso: "neta-umeshiso.png",
+    mayocorn: "neta-mayocorn.png",
     salad: "neta-salad.png",
     kampyo: "neta-kampyo.png",
   };
@@ -482,7 +482,7 @@
     kani: "nigiri-kani.png",
     mentaiko: "gunkan-mentaiko.png",
     tsunamayo: "gunkan-tsunamayo.png",
-    umeshiso: "maki-umeshiso.png",
+    mayocorn: "gunkan-mayocorn.png",
     salad: "gunkan-salad.png",
     kampyo: "maki-kampyo.png",
   };
@@ -879,7 +879,7 @@
       "kani",
       "mentaiko",
       "tsunamayo",
-      "umeshiso",
+      "mayocorn",
       "salad",
       "kampyo",
       "toki",

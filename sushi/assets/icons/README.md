@@ -33,7 +33,7 @@ Generated with Codex `gpt-5.6-luna` + built-in `image_gen` (realistic sushi food
 | `nigiri-kani.png` | Crab (kani) nigiri | かに握り |
 | `gunkan-mentaiko.png` | Mentaiko gunkan | めんたい軍艦 |
 | `gunkan-tsunamayo.png` | Tuna mayo gunkan | ツナマヨ軍艦 |
-| `maki-umeshiso.png` | Ume shiso maki — 4 upright pieces (conveyor-sushi style) | 梅しそ巻 |
+| `gunkan-mayocorn.png` | Mayo corn gunkan | マヨコーン軍艦 |
 | `gunkan-salad.png` | Salad gunkan | サラダ軍艦 |
 | `maki-kampyo.png` | Kampyo maki — 4 upright pieces (conveyor-sushi style) | かんぴょう巻 |
 | `neta-ika.png` | Squid slice (topping only) | いか（ネタ） |
@@ -44,7 +44,7 @@ Generated with Codex `gpt-5.6-luna` + built-in `image_gen` (realistic sushi food
 | `neta-kani.png` | Crab meat (topping only) | かに（ネタ） |
 | `neta-mentaiko.png` | Mentaiko mound (topping only) | めんたい（ネタ） |
 | `neta-tsunamayo.png` | Tuna mayo mound (topping only) | ツナマヨ（ネタ） |
-| `neta-umeshiso.png` | Ume + shiso filling (topping only) | 梅しそ（ネタ） |
+| `neta-mayocorn.png` | Mayo corn topping only | マヨコーン（ネタ） |
 | `neta-salad.png` | Salad mix filling (topping only) | サラダ（ネタ） |
 | `neta-kampyo.png` | Kampyo strips (topping only) | かんぴょう（ネタ） |
 

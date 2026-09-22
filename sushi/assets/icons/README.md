@@ -34,7 +34,7 @@ Generated with Codex `gpt-5.6-luna` + built-in `image_gen` (realistic sushi food
 | `gunkan-mentaiko.png` | Mentaiko gunkan | めんたい軍艦 |
 | `gunkan-tsunamayo.png` | Tuna mayo gunkan | ツナマヨ軍艦 |
 | `maki-umeshiso.png` | Ume shiso maki — 4 upright pieces (conveyor-sushi style) | 梅しそ巻 |
-| `maki-salad.png` | Salad maki — 4 upright pieces (conveyor-sushi style) | サラダ巻 |
+| `gunkan-salad.png` | Salad gunkan | サラダ軍艦 |
 | `maki-kampyo.png` | Kampyo maki — 4 upright pieces (conveyor-sushi style) | かんぴょう巻 |
 | `neta-ika.png` | Squid slice (topping only) | いか（ネタ） |
 | `neta-tako.png` | Octopus slice (topping only) | たこ（ネタ） |

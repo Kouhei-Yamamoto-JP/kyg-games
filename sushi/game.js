@@ -65,7 +65,7 @@
     { id: "mentaiko", name: "めんたい軍艦", emoji: "🌶️", type: "gunkan", neta: "mentaiko", weight: 2 },
     { id: "tsunamayo", name: "ツナマヨ軍艦", emoji: "🥪", type: "gunkan", neta: "tsunamayo", weight: 2 },
     { id: "umeshiso", name: "梅しそ巻", emoji: "🟣", type: "maki", neta: "umeshiso", weight: 2 },
-    { id: "salad", name: "サラダ巻", emoji: "🥗", type: "maki", neta: "salad", weight: 2 },
+    { id: "salad", name: "サラダ軍艦", emoji: "🥗", type: "gunkan", neta: "salad", weight: 2 },
     { id: "kampyo", name: "かんぴょう巻", emoji: "🤎", type: "maki", neta: "kampyo", weight: 2 },
     { id: "toki", name: "とき寿司", emoji: "⏰", type: "nigiri", neta: "toki", weight: 0, special: true, timeExtend: true },
   ];
@@ -73,8 +73,8 @@
   // タイプ別に使えるネタ（全体）
   const NETA_BY_TYPE = {
     nigiri: ["maguro", "salmon", "ebi", "tamago", "hamachi", "hotate", "ika", "tako", "anago", "engawa", "awabi", "kani", "toki"],
-    gunkan: ["ikura", "uni", "corn", "negitoro", "mentaiko", "tsunamayo"],
-    maki: ["cucumber", "maguro", "natto", "umeshiso", "salad", "kampyo"],
+    gunkan: ["ikura", "uni", "corn", "negitoro", "mentaiko", "tsunamayo", "salad"],
+    maki: ["cucumber", "maguro", "natto", "umeshiso", "kampyo"],
   };
 
   // レベルで解放される寿司 ID（累積）
@@ -432,7 +432,7 @@
   }
 
   const ICON_BASE = "assets/icons/";
-  const ICON_VER = "20260922c";
+  const ICON_VER = "20260922d";
   const ING_ICON_FILE = {
     shari: "shari.png",
     nori: "nori.png",
@@ -483,7 +483,7 @@
     mentaiko: "gunkan-mentaiko.png",
     tsunamayo: "gunkan-tsunamayo.png",
     umeshiso: "maki-umeshiso.png",
-    salad: "maki-salad.png",
+    salad: "gunkan-salad.png",
     kampyo: "maki-kampyo.png",
   };
 

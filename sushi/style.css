@@ -561,6 +561,21 @@ body {
   z-index: 25;
   overflow: hidden;
   max-height: min(48dvh, 360px);
+  transition: max-height 0.2s ease;
+}
+
+/* ネタ段数に合わせて材料枠を広げる */
+#craft-panel[data-ing-rows="2"] {
+  max-height: min(42dvh, 300px);
+}
+#craft-panel[data-ing-rows="3"] {
+  max-height: min(52dvh, 400px);
+}
+#craft-panel[data-ing-rows="4"] {
+  max-height: min(60dvh, 480px);
+}
+#craft-panel[data-ing-rows="5"] {
+  max-height: min(68dvh, 560px);
 }
 
 #craft-panel.shake {
@@ -617,9 +632,22 @@ body {
   justify-content: center;
   gap: 6px;
   overflow-y: auto;
-  max-height: min(260px, 48dvh);
+  max-height: min(200px, 36dvh);
   -webkit-overflow-scrolling: touch;
   pointer-events: auto;
+  transition: max-height 0.2s ease;
+}
+.craft-ingredients[data-ing-rows="2"] {
+  max-height: min(160px, 30dvh);
+}
+.craft-ingredients[data-ing-rows="3"] {
+  max-height: min(230px, 40dvh);
+}
+.craft-ingredients[data-ing-rows="4"] {
+  max-height: min(300px, 48dvh);
+}
+.craft-ingredients[data-ing-rows="5"] {
+  max-height: min(380px, 56dvh);
 }
 
 .craft-ingredients .ing-btn {
@@ -1377,6 +1405,15 @@ body {
     padding: 2px 8px 8px;
     gap: 4px;
   }
+  #craft-panel[data-ing-rows="3"] {
+    max-height: min(56dvh, 400px);
+  }
+  #craft-panel[data-ing-rows="4"] {
+    max-height: min(62dvh, 460px);
+  }
+  #craft-panel[data-ing-rows="5"] {
+    max-height: min(70dvh, 540px);
+  }
   .craft-preview {
     min-height: 40px;
   }
@@ -1417,6 +1454,15 @@ body {
     overflow: hidden;
     max-height: min(54dvh, 360px);
   }
+  #craft-panel[data-ing-rows="3"] {
+    max-height: min(58dvh, 420px);
+  }
+  #craft-panel[data-ing-rows="4"] {
+    max-height: min(64dvh, 480px);
+  }
+  #craft-panel[data-ing-rows="5"] {
+    max-height: min(72dvh, 560px);
+  }
   .craft-preview {
     min-height: 36px;
     max-height: 44px;
@@ -1431,8 +1477,17 @@ body {
   }
   .craft-ingredients {
     z-index: 20;
-    max-height: min(220px, 42dvh);
+    max-height: min(180px, 34dvh);
     gap: 4px;
+  }
+  .craft-ingredients[data-ing-rows="3"] {
+    max-height: min(240px, 42dvh);
+  }
+  .craft-ingredients[data-ing-rows="4"] {
+    max-height: min(300px, 50dvh);
+  }
+  .craft-ingredients[data-ing-rows="5"] {
+    max-height: min(360px, 56dvh);
   }
   .ing-btn {
     z-index: 21;
@@ -1881,12 +1936,3 @@ body {
   box-shadow: 0 0 0 2px rgba(244, 162, 97, 0.4);
 }
 
-/* 高レベルで材料5段まで見えるよう余白 */
-.craft-ingredients {
-  max-height: min(260px, 48dvh);
-}
-@media (max-width: 600px) {
-  .craft-ingredients {
-    max-height: min(220px, 42dvh);
-  }
-}

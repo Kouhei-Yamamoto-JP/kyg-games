@@ -908,8 +908,28 @@
       );
       craftIngredients.appendChild(btn);
     }
+    syncCraftPanelSize();
     if (state) updateCraftUI();
   }
+
+  function syncCraftPanelSize() {
+    if (!craftPanel || !craftIngredients) return;
+    const count = craftIngredients.querySelectorAll(".ing-btn").length;
+    const narrow = window.matchMedia("(max-width: 600px)").matches;
+    const perRow = narrow ? 5 : 7;
+    // 2〜5段。ネタ解放でボタンが増えるほど枠を広げる
+    let rows = Math.ceil(count / perRow);
+    if (rows < 2) rows = 2;
+    if (rows > 5) rows = 5;
+    craftPanel.dataset.ingRows = String(rows);
+    craftIngredients.dataset.ingRows = String(rows);
+  }
+
+  let craftResizeTimer = null;
+  window.addEventListener("resize", () => {
+    clearTimeout(craftResizeTimer);
+    craftResizeTimer = setTimeout(syncCraftPanelSize, 120);
+  });
 
   function renderPlateContent(plate) {
     const el = plate.el;

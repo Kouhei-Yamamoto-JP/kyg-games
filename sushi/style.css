@@ -1864,3 +1864,19 @@ body {
   -webkit-overflow-scrolling: touch;
   padding-right: 4px;
 }
+
+/* ときネタ（時間延長） */
+.ing-btn.special {
+  border-color: #f4a261;
+  background: linear-gradient(180deg, #fff7e6, #ffe0a3);
+  box-shadow: 0 0 0 2px rgba(244, 162, 97, 0.35);
+  animation: toki-pulse 1.2s ease-in-out infinite;
+}
+@keyframes toki-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+.customer.toki-order {
+  border-color: #f4a261;
+  box-shadow: 0 0 0 2px rgba(244, 162, 97, 0.4);
+}

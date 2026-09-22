@@ -27,6 +27,7 @@
     negitoro: { id: "negitoro", name: "ねぎとろ", emoji: "🧅", kind: "neta" },
     cucumber: { id: "cucumber", name: "きゅうり", emoji: "🥒", kind: "neta" },
     natto: { id: "natto", name: "納豆", emoji: "🫘", kind: "neta" },
+    toki: { id: "toki", name: "ときネタ", emoji: "⏰", kind: "neta", special: true },
   };
 
   // —— 完成寿司 ——
@@ -44,27 +45,29 @@
     { id: "kappa", name: "かっぱ巻", emoji: "🥒", type: "maki", neta: "cucumber", weight: 2 },
     { id: "tekka", name: "鉄火巻", emoji: "🍱", type: "maki", neta: "maguro", weight: 2 },
     { id: "natto", name: "納豆巻", emoji: "🫘", type: "maki", neta: "natto", weight: 2 },
+    { id: "toki", name: "とき寿司", emoji: "⏰", type: "nigiri", neta: "toki", weight: 0, special: true, timeExtend: true },
   ];
 
   // タイプ別に使えるネタ（全体）
   const NETA_BY_TYPE = {
-    nigiri: ["maguro", "salmon", "ebi", "tamago", "hamachi", "hotate"],
+    nigiri: ["maguro", "salmon", "ebi", "tamago", "hamachi", "hotate", "toki"],
     gunkan: ["ikura", "uni", "corn", "negitoro"],
     maki: ["cucumber", "maguro", "natto"],
   };
 
   // レベルで解放される寿司 ID（累積）
   // 解放マイルストーン: Lv1〜3は少なめ、以降は5レベルごと
+  // Lv1〜3は少なめ。以降は必ず +5 レベルごと（8,13,18,23）
   const LEVEL_UNLOCKS = {
     1: ["maguro", "salmon"],
     2: ["ebi", "tamago"],
     3: ["ikura", "uni"],
-    5: ["kappa", "tekka"],
-    10: ["hamachi", "hotate"],
-    15: ["corn", "negitoro"],
-    20: ["natto"],
+    8: ["kappa", "tekka"],
+    13: ["hamachi", "hotate"],
+    18: ["corn", "negitoro"],
+    23: ["natto"],
   };
-  const MAX_UNLOCK_LEVEL = 20;
+  const MAX_UNLOCK_LEVEL = 23;
   const SERVES_PER_LEVEL = 10;
 
   // お客さんのベルト座席（楕円 progress 0..1、上弧付近）
@@ -98,6 +101,10 @@
   const POINTS_COMBO = 25;
   const START_TIME_MS = 90000;
   const MAX_SESSION_MS = 600000;
+  const TIME_EXTEND_MS = 45000; // とき寿司配膳で +45秒（600秒壁を超えられる）
+  const TOKI_SPAWN_MIN_MS = 50000;
+  const TOKI_SPAWN_MAX_MS = 100000;
+  const TOKI_AVAILABLE_MS = 28000;
   const SERVE_BONUS_MS = 12000;
   const RANK_NAME_MAX = 12;
 
@@ -318,6 +325,7 @@
       const list = LEVEL_UNLOCKS[lv];
       if (list) ids.push.apply(ids, list);
     }
+    if (state && state.tokiAvailable && ids.indexOf("toki") < 0) ids.push("toki");
     return ids;
   }
 
@@ -327,13 +335,14 @@
 
   function getUnlockedSushi(level) {
     const ids = new Set(getUnlockedSushiIds(level));
+    if (state && state.tokiAvailable) ids.add("toki");
     return SUSHI.filter((s) => ids.has(s.id));
   }
 
   function getUnlockedTypes(level) {
     const types = ["nigiri"];
     if (level >= 3) types.push("gunkan");
-    if (level >= 5) types.push("maki");
+    if (level >= 8) types.push("maki");
     return types;
   }
 
@@ -343,6 +352,7 @@
     for (const s of getUnlockedSushi(level)) {
       ids.add(s.neta);
     }
+    if (state && state.tokiAvailable) ids.add("toki");
     return ids;
   }
 
@@ -350,13 +360,27 @@
     const unlocked = new Set(getUnlockedSushiIds(level));
     const all = NETA_BY_TYPE[typeId] || [];
     return all.filter((netaId) => {
+      if (netaId === "toki") {
+        return !!(state && state.tokiAvailable);
+      }
       const sushi = findSushiByTypeAndNeta(typeId, netaId);
       return sushi && unlocked.has(sushi.id);
     });
   }
 
   function pickSushi() {
-    const list = getUnlockedSushi(state.level);
+    if (state && state.tokiAvailable) {
+      const hasTokiOrder = state.customers.some(function (c) {
+        return c.sushi && c.sushi.id === "toki";
+      });
+      if (!hasTokiOrder) {
+        const toki = SUSHI.find(function (s) { return s.id === "toki"; });
+        if (toki) return toki;
+      }
+    }
+    const list = getUnlockedSushi(state.level).filter(function (s) {
+      return !s.special;
+    });
     if (!list.length) return SUSHI[0];
     return weightedPick(list);
   }
@@ -794,6 +818,7 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "ing-btn " + (ing.kind === "neta" ? "neta" : "base");
+      if (id === "toki") btn.classList.add("special");
       btn.dataset.ingId = id;
       btn.innerHTML =
         '<span class="ing-icon">' +
@@ -874,7 +899,7 @@
     const maxP = FIXED_PATIENCE;
 
     const el = document.createElement("div");
-    el.className = "customer";
+    el.className = "customer" + (sushi && sushi.id === "toki" ? " toki-order" : "");
     el.innerHTML =
       '<div class="customer-face">' +
       face +
@@ -1073,8 +1098,9 @@
       if (rankNameInput) rankNameInput.focus();
       return;
     }
+    let list = null;
     try {
-      await RankingAPI.saveScore({
+      list = await RankingAPI.saveScore({
         name: name || "ななし",
         score: state.score,
         level: state.level,
@@ -1091,7 +1117,13 @@
       throw e;
     }
     setRankingFormVisible(false);
-    await refreshRankingViews(state.score);
+    // POST レスポンスで即反映（再GET待ちにしない）
+    if (list && list.length) {
+      renderRankingList(startRankingList, list);
+      renderRankingList(gameoverRankingList, list, state.score);
+    } else {
+      await refreshRankingViews(state.score);
+    }
     showToast("ランキングに登録したよ", "ok");
   }
 
@@ -1201,9 +1233,80 @@
     updateHud();
   }
 
-  function addServeTimeBonus() {
-    const cap = Math.max(0, MAX_SESSION_MS - state.elapsed);
-    state.timeLeft = Math.min(state.timeLeft + SERVE_BONUS_MS, cap);
+
+  function scheduleNextToki(fromElapsed) {
+    const span = TOKI_SPAWN_MAX_MS - TOKI_SPAWN_MIN_MS;
+    state.nextTokiAt = fromElapsed + TOKI_SPAWN_MIN_MS + Math.floor(Math.random() * span);
+    state.tokiAvailable = false;
+    state.tokiExpireAt = 0;
+  }
+
+  function activateTokiEvent() {
+    if (!state || !state.running) return;
+    state.tokiAvailable = true;
+    state.tokiExpireAt = state.elapsed + TOKI_AVAILABLE_MS;
+    buildIngredientButtons();
+    // とき寿司を注文するお客さんを優先投入
+    const hasToki = state.customers.some(function (c) {
+      return c.sushi && c.sushi.id === "toki";
+    });
+    if (!hasToki) {
+      if (state.customers.length < state.maxActive) {
+        state.customers.push(createCustomer(state.customers.length));
+      } else if (state.customers.length) {
+        // 先頭以外をとき注文に差し替え
+        const idx = Math.min(1, state.customers.length - 1);
+        const old = state.customers[idx];
+        const neu = createCustomer(idx);
+        if (old && old.el && old.el.parentNode) old.el.remove();
+        state.customers[idx] = neu;
+        reassignCustomerSeats();
+      }
+      renderCustomers(true);
+    }
+    showToast("⏰ ときネタ出現！届けると時間延長", "ok", 2200);
+  }
+
+  function updateTokiEvent() {
+    if (!state || !state.running) return;
+    if (!state.tokiAvailable && state.elapsed >= state.nextTokiAt) {
+      activateTokiEvent();
+      return;
+    }
+    if (state.tokiAvailable && state.elapsed >= state.tokiExpireAt) {
+      const stillWanted = state.customers.some(function (c) {
+        return c.sushi && c.sushi.id === "toki" && !c.serving;
+      });
+      if (!stillWanted) {
+        scheduleNextToki(state.elapsed);
+        buildIngredientButtons();
+      } else {
+        // 注文が残っている間はボタン維持、期限だけ延ばす
+        state.tokiExpireAt = state.elapsed + 8000;
+      }
+    }
+  }
+
+  function sessionTimeCap() {
+    return MAX_SESSION_MS + (state.sessionBonusMs || 0);
+  }
+
+  function addServeTimeBonus(extraMs) {
+    const add = extraMs == null ? SERVE_BONUS_MS : extraMs;
+    const cap = Math.max(0, sessionTimeCap() - state.elapsed);
+    state.timeLeft = Math.min(state.timeLeft + add, cap);
+  }
+
+  function grantTokiTimeExtend() {
+    state.sessionBonusMs = (state.sessionBonusMs || 0) + TIME_EXTEND_MS;
+    state.timeLeft += TIME_EXTEND_MS;
+    // 壁を超えてカウントアップできるよう、経過に対する上限も押し上げる
+    const cap = Math.max(0, sessionTimeCap() - state.elapsed);
+    if (state.timeLeft > cap) state.timeLeft = cap;
+    showToast("⏰ とき寿司！ +" + Math.round(TIME_EXTEND_MS / 1000) + "秒延長", "ok", 2000);
+    scheduleNextToki(state.elapsed + 5000);
+    state.tokiAvailable = false;
+    buildIngredientButtons();
   }
 
   function performAutoServe(plate, cust) {
@@ -1217,7 +1320,11 @@
     state.score += POINTS_CORRECT + bonus;
     state.combo += 1;
     state.servedTotal += 1;
-    addServeTimeBonus();
+    if (plate.sushi && plate.sushi.timeExtend) {
+      grantTokiTimeExtend();
+    } else {
+      addServeTimeBonus();
+    }
 
     plate.el.classList.add("flash-ok");
     showToast(
@@ -1321,7 +1428,8 @@
     state.elapsed += dt;
     state.timeLeft -= dt;
     // 残り時間が「総経過600秒」を超えないようキャップ
-    const maxLeft = Math.max(0, MAX_SESSION_MS - state.elapsed);
+    updateTokiEvent();
+    const maxLeft = Math.max(0, sessionTimeCap() - state.elapsed);
     if (state.timeLeft > maxLeft) state.timeLeft = maxLeft;
 
     if (state.timeLeft <= 0) {
@@ -1362,6 +1470,10 @@
       servedTotal: 0,
       elapsed: 0,
       timeLeft: START_TIME_MS,
+      sessionBonusMs: 0,
+      tokiAvailable: false,
+      tokiExpireAt: 0,
+      nextTokiAt: TOKI_SPAWN_MIN_MS + Math.floor(Math.random() * (TOKI_SPAWN_MAX_MS - TOKI_SPAWN_MIN_MS)),
       lastUnlockAt: 0,
       maxActive: 1,
       customers: [],

@@ -53,3 +53,7 @@ npx serve .
 ```
 
 `package.json` は不要です。静的ファイルのみで完結します。
+
+## Analytics
+
+GA4 測定ID `G-6NN07DBP18` を `analytics.js` 経由で全ページに読み込み。ページ別は GA の「レポート → エンゲージメント → ページとスクリーン」で確認。
